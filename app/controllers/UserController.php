@@ -87,13 +87,11 @@ class UserController {
             }
     
             // ✅ Kiểm tra email đã tồn tại nếu không có lỗi trước đó
-            if (empty($errors)) {
                 $stmt = $GLOBALS['conn']->prepare("SELECT id FROM users WHERE email = ?");
                 $stmt->execute([$email]);
                 if ($stmt->rowCount() > 0) {
                     $errors['email'] = "Email đã tồn tại.";
                 }
-            }
     
             // ✅ Nếu không có lỗi, thực hiện đăng ký
             if (empty($errors)) {
