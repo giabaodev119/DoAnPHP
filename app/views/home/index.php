@@ -8,9 +8,6 @@
 </head>
 <body>
 
-<header>
-    <h1>Shop Công Nghệ</h1>
-</header>
 
 <section class="banner">
     Chào mừng đến với cửa hàng công nghệ!
@@ -62,9 +59,7 @@
 </section>
 
 
-<footer>
-    &copy; 2025 - Shop Công Nghệ. All rights reserved.
-</footer>
+
 
 </body>
 </html>
