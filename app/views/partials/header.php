@@ -8,7 +8,7 @@
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <a class="navbar-brand" href="#">Website</a>
+        <a class="navbar-brand" href="index.php?controller=home&action=index">Website</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -18,7 +18,7 @@
                     <a class="nav-link" href="index.php?controller=admin&action=products">Danh sách sản phẩm</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="index.php?controller=cart&action=view">Giỏ hàng</a>
+                    <a class="nav-link" href="index.php?controller=cart&action=index">Giỏ hàng</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link btn btn-primary" href="index.php?controller=user&action=login">Đăng nhập</a>
