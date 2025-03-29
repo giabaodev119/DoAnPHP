@@ -14,7 +14,22 @@ class ProductController {
         $product = $productModel->getProductById($id);
         require_once 'app/views/products/detail.php';
     }
-
+    public function search() {
+        $keyword = isset($_GET['keyword']) ? trim($_GET['keyword']) : '';
+        $category = isset($_GET['category']) ? $_GET['category'] : '';
+    
+        // Gọi model để tìm kiếm sản phẩm
+        $productModel = new Product();
+        $products = $productModel->searchProducts($keyword, $category);
+    
+        // Load giao diện kết quả tìm kiếm
+        require_once 'app/views/home/search.php';
+        //var_dump($products);
+exit();
+    }
+    
+    
+    
     public function create() {
         $categoryModel = new Category();
         $categories = $categoryModel->getAll();

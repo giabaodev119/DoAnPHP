@@ -23,17 +23,19 @@ switch ($controller) {
         }
         break;
 
-    case 'product':
-        $productController = new ProductController();
-        if ($action == 'index') {
-            $productController->index();
-        } elseif ($action == 'detail' && isset($_GET['id'])) {
-            $productController->detail($_GET['id']);
-        } elseif ($action === 'create') {
-            $productController->create();
-        }
-        break;
-
+        case 'product':
+            $productController = new ProductController();
+            if ($action == 'index') {
+                $productController->index();
+            } elseif ($action == 'detail' && isset($_GET['id'])) {
+                $productController->detail($_GET['id']);
+            } elseif ($action === 'create') {
+                $productController->create();
+            } elseif ($action === 'search') { // Thêm xử lý tìm kiếm
+                $productController->search();
+            }
+            break;
+        
     case 'category':
         $categoryController = new CategoryController();
         if ($action === 'create') {

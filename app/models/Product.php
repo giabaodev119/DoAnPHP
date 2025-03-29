@@ -38,6 +38,27 @@ class Product {
         $stmt = $this->conn->prepare("INSERT INTO product_images (product_id, image_path) VALUES (?, ?)");
         $stmt->execute([$product_id, $image_path]);
     }
+    public function searchProducts($keyword, $category)
+    {
+        $sql = "SELECT * FROM products WHERE name LIKE :keyword";
+        if (!empty($category)) {
+            $sql .= " AND category_id = :category";
+        }
+    
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':keyword', "%$keyword%", PDO::PARAM_STR);
+        if (!empty($category)) {
+            $stmt->bindValue(':category', $category, PDO::PARAM_INT);
+        }
+        $stmt->execute();
+    
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+    
+    
+    
+    
+    
     
 }
 ?>
