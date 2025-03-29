@@ -28,9 +28,9 @@ class Product {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function create($name, $price, $description, $category_id) {
-        $stmt = $this->conn->prepare("INSERT INTO products (name, price, description, category_id) VALUES (?, ?, ?, ?)");
-        $stmt->execute([$name, $price, $description, $category_id]);
+    public function create($name, $price, $description, $category_id, $featured) {
+        $stmt = $this->conn->prepare("INSERT INTO products (name, price, description, category_id,featured) VALUES (?, ?, ?, ?, ?)");
+        $stmt->execute([$name, $price, $description, $category_id, $featured]);
         return $this->conn->lastInsertId();
     }
     
@@ -38,6 +38,27 @@ class Product {
         $stmt = $this->conn->prepare("INSERT INTO product_images (product_id, image_path) VALUES (?, ?)");
         $stmt->execute([$product_id, $image_path]);
     }
+    public function searchProducts($keyword, $category)
+    {
+        $sql = "SELECT * FROM products WHERE name LIKE :keyword";
+        if (!empty($category)) {
+            $sql .= " AND category_id = :category";
+        }
+    
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':keyword', "%$keyword%", PDO::PARAM_STR);
+        if (!empty($category)) {
+            $stmt->bindValue(':category', $category, PDO::PARAM_INT);
+        }
+        $stmt->execute();
+    
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+    
+    
+    
+    
+    
     
 }
 ?>

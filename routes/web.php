@@ -36,8 +36,10 @@ switch ($controller) {
         } elseif ($action === 'addToCart' && isset($_GET['id'])) {
             $productController->addToCart($_GET['id']);
         }
+         elseif ($action === 'search') { // Thêm xử lý tìm kiếm
+                $productController->search();
+            }
         break;
-
     case 'category':
         $categoryController = new CategoryController();
         if ($action === 'create') {
