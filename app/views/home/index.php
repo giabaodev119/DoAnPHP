@@ -47,19 +47,6 @@
         🔍 Tìm kiếm
     </button>
 </form>
-
-            <h2>Sản phẩm nổi bật</h2>
-            <div class="product-grid">
-                <?php foreach ($featuredProducts as $product) : ?>
-                    <div class="product-card">
-                        <a href="index.php?controller=product&action=detail&id=<?= $product['id'] ?>">
-                        <?php
-                            $imagePath = !empty($product['image']) && file_exists("public/images/" . $product['image'])? "public/images/" . $product['image'] : "public/images/default.jpg";
-                        ?>
-                            <img src="<?= $imagePath ?>" alt="<?= $product['name'] ?>">
-
-
-
     <section class="products">
         <ul>
             <section class="products">
