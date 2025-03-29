@@ -36,79 +36,10 @@
   </head>
   <body>
     <div class="wrapper">
-      <!-- Sidebar -->
-      <div class="sidebar" data-background-color="dark">
-        <div class="sidebar-logo">
-          <!-- Logo Header -->
-          <div class="logo-header" data-background-color="dark">
-            <a href="index.html" class="logo">
-              <img
-                src="public/img/kaiadmin/logo_light.svg"
-                alt="navbar brand"
-                class="navbar-brand"
-                height="20"
-              />
-            </a>
-            <div class="nav-toggle">
-              <button class="btn btn-toggle toggle-sidebar">
-                <i class="gg-menu-right"></i>
-              </button>
-              <button class="btn btn-toggle sidenav-toggler">
-                <i class="gg-menu-left"></i>
-              </button>
-            </div>
-            <button class="topbar-toggler more">
-              <i class="gg-more-vertical-alt"></i>
-            </button>
-          </div>
-          <!-- End Logo Header -->
-        </div>
-        <div class="sidebar-wrapper scrollbar scrollbar-inner">
-          <div class="sidebar-content">
-            <ul class="nav nav-secondary">
-              <li class="nav-section">
-                <span class="sidebar-mini-icon">
-                  <i class="fa fa-ellipsis-h"></i>
-                </span>
-                <h4 class="text-section">Quản Lý</h4>
-              </li>
-              <li class="nav-item">
-                <a data-bs-toggle="collapse" href="#base">
-                  <i class="fas fa-layer-group"></i>
-                  <p>Danh Mục</p>
-                  <span class="caret"></span>
-                </a>
-                <div class="collapse" id="base">
-                  <ul class="nav nav-collapse">
-                    <li>
-                      <a href="index.php?controller=admin&action=categories">
-                        <span class="sub-item">Phân Loại</span>
-                      </a>
-                    </li>
-                    <li>
-                      <a href="index.php?controller=product&action=index">
-                        <span class="sub-item">Sản Phẩm</span>
-                      </a>
-                    </li>
-                    <li>
-                      <a href="components/gridsystem.html">
-                        <span class="sub-item">Người Dùng</span>
-                      </a>
-                    </li>
-                    <li>
-                      <a href="components/panels.html">
-                        <span class="sub-item">Đơn Hàng</span>
-                      </a>
-                    </li>
-                  </ul>
-                </div>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </div>
-      <!-- End Sidebar -->
 
+      <?php 
+        require_once 'app/views/partials/sidebar.php';
+      ?>
       <!-- Main Content -->
       <div class="main-panel">
         <div class="content">
@@ -118,9 +49,9 @@
               <a href="index.php?controller=product&action=create" class="btn btn-success">+ Thêm sản phẩm</a>
             </div>
             
-            <?php if (isset($_GET['success'])): ?>
-              <div class="alert alert-success">
-                Thao tác thành công!
+            <?php if (isset($_GET['success']) && $_GET['success'] == 1): ?>
+              <div id="success-alert" class="alert alert-success">
+                Sản phẩm đã được thêm thành công!
               </div>
             <?php endif; ?>
             
@@ -145,8 +76,8 @@
                           <td><?= number_format($product['price'], 0, ',', '.') ?> đ</td>
                           <td><?= htmlspecialchars($product['category_name'] ?? 'N/A') ?></td>
                           <td>
-                            <a href="#" class="btn btn-sm btn-warning">Sửa</a>
-                            <a href="#" class="btn btn-sm btn-danger" 
+                            <a href="index.php?controller=product&action=edit&id=<?= $product['id'] ?>" class="btn btn-sm btn-warning">Sửa</a>
+                            <a href="index.php?controller=product&action=delete&id=<?= $product['id'] ?>" class="btn btn-sm btn-danger" 
                               onclick="return confirm('Bạn có chắc muốn xóa sản phẩm này?')">Xóa</a>
                           </td>
                         </tr>
@@ -188,6 +119,15 @@
             this.parentElement.classList.add('active');
           });
         });
+
+        const successAlert = document.getElementById('success-alert');
+        if (successAlert) {
+            setTimeout(() => {
+                successAlert.style.transition = 'opacity 0.5s';
+                successAlert.style.opacity = '0';
+                setTimeout(() => successAlert.remove(), 500); // Xóa hẳn sau khi ẩn
+            }, 10000); // 10 giây
+        }
       });
     </script>
     

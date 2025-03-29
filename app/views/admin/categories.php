@@ -44,81 +44,7 @@
 <body>
     <div class="wrapper">
       <!-- Sidebar -->
-      <div class="sidebar" data-background-color="dark">
-        <div class="sidebar-logo">
-          <!-- Logo Header -->
-          <div class="logo-header" data-background-color="dark">
-            <a href="index.html" class="logo">
-              <img
-                src="public/img/kaiadmin/logo_light.svg"
-                alt="navbar brand"
-                class="navbar-brand"
-                height="20"
-              />
-            </a>
-            <div class="nav-toggle">
-              <button class="btn btn-toggle toggle-sidebar">
-                <i class="gg-menu-right"></i>
-              </button>
-              <button class="btn btn-toggle sidenav-toggler">
-                <i class="gg-menu-left"></i>
-              </button>
-            </div>
-            <button class="topbar-toggler more">
-              <i class="gg-more-vertical-alt"></i>
-            </button>
-          </div>
-          <!-- End Logo Header -->
-        </div>
-        <div class="sidebar-wrapper scrollbar scrollbar-inner">
-          <div class="sidebar-content">
-            <ul class="nav nav-secondary">
-              <li class="nav-section">
-                <span class="sidebar-mini-icon">
-                  <i class="fa fa-ellipsis-h"></i>
-                </span>
-                <h4 class="text-section">Quản Lý</h4>
-              </li>
-              <li class="nav-item">
-                <a data-bs-toggle="collapse" href="#base">
-                  <i class="fas fa-layer-group"></i>
-                  <p>Danh Mục</p>
-                  <span class="caret"></span>
-                </a>
-                <div class="collapse" id="base">
-                  <ul class="nav nav-collapse">
-                    <li>
-                      <a href="index.php?controller=admin&action=categories">
-                        <span class="sub-item">Danh sách</span>
-                      </a>
-                    </li>
-                    <li>
-                      <a href="index.php?controller=category&action=create">
-                        <span class="sub-item">Thêm mới</span>
-                      </a>
-                    </li>
-                    <li>
-                      <a href="index.php?controller=admin&action=products">
-                        <span class="sub-item">Sản Phẩm</span>
-                      </a>
-                    </li>
-                    <li>
-                      <a href="components/gridsystem.html">
-                        <span class="sub-item">Người Dùng</span>
-                      </a>
-                    </li>
-                    <li>
-                      <a href="components/panels.html">
-                        <span class="sub-item">Đơn Hàng</span>
-                      </a>
-                    </li>
-                  </ul>
-                </div>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </div>
+      <?php require_once 'app/views/partials/sidebar.php'; ?>
       <!-- End Sidebar -->
 
       <!-- Main Content -->
@@ -129,9 +55,13 @@
                 <h2>Quản lý danh mục</h2>
                 <a href="index.php?controller=category&action=create" class="btn btn-primary mb-3">➕ Thêm danh mục</a>
                 
-                <?php if (isset($_GET['success'])): ?>
-                    <div class="alert alert-success">
-                        Thêm danh mục thành công!
+                <?php if (isset($_GET['success']) && $_GET['success'] == 1): ?>
+                    <div id="success-alert" class="alert alert-success">
+                        Danh mục đã được thêm/cập nhật thành công!
+                    </div>
+                <?php elseif (isset($_GET['error']) && $_GET['error'] == 1): ?>
+                    <div id="error-alert" class="alert alert-danger">
+                        Có lỗi xảy ra. Vui lòng thử lại.
                     </div>
                 <?php endif; ?>
                 
@@ -150,8 +80,13 @@
                                     <td><?= htmlspecialchars($cat['id']) ?></td>
                                     <td><?= htmlspecialchars($cat['name']) ?></td>
                                     <td>
-                                        <a href="#" class="btn btn-sm btn-warning">Sửa</a>
-                                        <a href="#" class="btn btn-sm btn-danger"
+                                        <!-- Nút sửa -->
+                                        <a href="index.php?controller=category&action=edit&id=<?= $cat['id'] ?>" 
+                                           class="btn btn-sm btn-warning">Sửa</a>
+                                        
+                                        <!-- Nút xóa -->
+                                        <a href="index.php?controller=category&action=delete&id=<?= $cat['id'] ?>" 
+                                           class="btn btn-sm btn-danger"
                                            onclick="return confirm('Bạn có chắc chắn muốn xóa danh mục này?')">Xóa</a>
                                     </td>
                                 </tr>
@@ -192,6 +127,24 @@
             this.parentElement.classList.add('active');
           });
         });
+
+        const successAlert = document.getElementById('success-alert');
+        const errorAlert = document.getElementById('error-alert');
+
+        if (successAlert || errorAlert) {
+            setTimeout(() => {
+                if (successAlert) {
+                    successAlert.style.transition = 'opacity 0.5s';
+                    successAlert.style.opacity = '0';
+                    setTimeout(() => successAlert.remove(), 500); // Xóa hẳn sau khi ẩn
+                }
+                if (errorAlert) {
+                    errorAlert.style.transition = 'opacity 0.5s';
+                    errorAlert.style.opacity = '0';
+                    setTimeout(() => errorAlert.remove(), 500); // Xóa hẳn sau khi ẩn
+                }
+            }, 10000); // 10 giây
+        }
       });
     </script>
     

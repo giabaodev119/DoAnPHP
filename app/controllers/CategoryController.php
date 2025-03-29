@@ -20,7 +20,7 @@ class CategoryController {
             if (!empty($name)) {
                 $category = new Category();
                 if ($category->create($name)) {
-                    header("Location: index.php?controller=category&action=index&success=1");
+                    header("Location: index.php?controller=admin&action=categories&success=1");
                     exit;
                 } else {
                     $error = "Lỗi khi thêm danh mục. Vui lòng thử lại.";
@@ -38,10 +38,10 @@ class CategoryController {
         $categoryModel = new Category();
 
         if ($categoryModel->delete($id)) {
-            header("Location: index.php?controller=category&action=index&success=1");
+            header("Location: index.php?controller=admin&action=categories&success=1");
             exit;
         } else {
-            header("Location: index.php?controller=category&action=index&error=1");
+            header("Location: index.php?controller=admin&action=categories&error=1");
             exit;
         }
     }
@@ -56,7 +56,7 @@ class CategoryController {
 
             if (!empty($name)) {
                 if ($categoryModel->update($id, $name)) {
-                    header("Location: index.php?controller=category&action=index&success=1");
+                    header("Location: index.php?controller=admin&action=categories&success=1");
                     exit;
                 } else {
                     $error = "Lỗi khi cập nhật danh mục. Vui lòng thử lại.";

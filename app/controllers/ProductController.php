@@ -36,15 +36,11 @@ class ProductController
         // Load giao diện kết quả tìm kiếm
         require_once 'app/views/home/search.php';
         //var_dump($products);
-exit();
+    exit();
     }
     
-    
-
-
     public function create()
     {
-
         $categoryModel = new Category();
         $categories = $categoryModel->getAllCategories();
 
@@ -55,7 +51,8 @@ exit();
             $category_id = $_POST['category_id'] ?? 0;
 
             $productModel = new Product();
-            $productId = $productModel->create($name, $price, $description, $category_id);
+            $stock = $_POST['stock'] ?? 0; // Assuming 'stock' is the missing argument
+            $productId = $productModel->create($name, $price, $description, $category_id, $stock);
 
             if ($productId && !empty($_FILES['images'])) {
                 $uploadDir = 'public/images/';
@@ -75,7 +72,7 @@ exit();
                 }
             }
             
-            header("Location: index.php?controller=product&action=index&success=1");
+            header("Location: index.php?controller=admin&action=products&success=1");
             exit;
         }
 
@@ -97,6 +94,32 @@ exit();
 
         require_once 'app/views/products/show.php';
 }
+
+    public function edit($id) {
+        $productModel = new Product();
+        $categoryModel = new Category();
+
+        $product = $productModel->getProductById($id);
+        $categories = $categoryModel->getAllCategories();
+        $error = null;
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $name = $_POST['name'] ?? '';
+            $price = $_POST['price'] ?? 0;
+            $description = $_POST['description'] ?? '';
+            $category_id = $_POST['category_id'] ?? 0;
+            $featured = $_POST['featured'] ?? 0;
+
+            if ($productModel->update($id, $name, $price, $description, $category_id, $featured)) {
+                header("Location: index.php?controller=admin&action=products&success=1");
+                exit;
+            } else {
+                $error = "Lỗi khi cập nhật sản phẩm. Vui lòng thử lại.";
+            }
+        }
+
+        require_once 'app/views/products/edit.php';
+    }
 
     // add to cart
     public function addToCart($productId)
@@ -122,8 +145,25 @@ exit();
         exit;
     }
 
+    public function delete($id) {
+        $productModel = new Product();
 
+        if ($productModel->delete($id)) {
+            header("Location: index.php?controller=admin&action=products&success=1");
+            exit;
+        } else {
+            header("Location: index.php?controller=admin&action=products&error=1");
+            exit;
+        }
+    }
 
+    public function detail($id) {
+        $productModel = new Product();
 
+        $product = $productModel->getProductById($id);
+        $images = $productModel->getProductImages($id);
+
+        require_once 'app/views/products/detail.php';
+    }
 }
 ?>

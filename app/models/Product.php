@@ -38,6 +38,7 @@ class Product {
         $stmt = $this->conn->prepare("INSERT INTO product_images (product_id, image_path) VALUES (?, ?)");
         $stmt->execute([$product_id, $image_path]);
     }
+    
     public function searchProducts($keyword, $category)
     {
         $sql = "SELECT * FROM products WHERE name LIKE :keyword";
@@ -54,11 +55,21 @@ class Product {
     
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
-    
-    
-    
-    
-    
-    
+
+    public function update($id, $name, $price, $description, $category_id, $featured) {
+        $stmt = $this->conn->prepare("UPDATE products SET name = ?, price = ?, description = ?, category_id = ?, featured = ? WHERE id = ?");
+        return $stmt->execute([$name, $price, $description, $category_id, $featured, $id]);
+    }
+
+    public function delete($id) {
+        $stmt = $this->conn->prepare("DELETE FROM products WHERE id = ?");
+        return $stmt->execute([$id]);
+    }
+
+    public function getProductImages($product_id) {
+        $stmt = $this->conn->prepare("SELECT image_path FROM product_images WHERE product_id = ?");
+        $stmt->execute([$product_id]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }
 ?>

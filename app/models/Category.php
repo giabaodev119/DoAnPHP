@@ -41,6 +41,57 @@ class Category {
     }
 
     /**
+     * Xóa một danh mục theo ID
+     * @param int $id ID của danh mục
+     * @return bool True nếu thành công, False nếu thất bại
+     */
+    public function delete($id) {
+        try {
+            $stmt = $this->conn->prepare("DELETE FROM categories WHERE id = :id");
+            $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+            return $stmt->execute();
+        } catch (PDOException $e) {
+            error_log("[" . date('Y-m-d H:i:s') . "] Database error in delete(): " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Lấy danh mục theo ID
+     * @param int $id ID của danh mục
+     * @return array|null Mảng thông tin danh mục hoặc null nếu có lỗi
+     */
+    public function getById($id) {
+        try {
+            $stmt = $this->conn->prepare("SELECT * FROM categories WHERE id = :id");
+            $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetch(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("[" . date('Y-m-d H:i:s') . "] Database error in getById(): " . $e->getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * Cập nhật danh mục theo ID
+     * @param int $id ID của danh mục
+     * @param string $name Tên mới của danh mục
+     * @return bool True nếu thành công, False nếu thất bại
+     */
+    public function update($id, $name) {
+        try {
+            $stmt = $this->conn->prepare("UPDATE categories SET name = :name WHERE id = :id");
+            $stmt->bindParam(':name', $name, PDO::PARAM_STR);
+            $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+            return $stmt->execute();
+        } catch (PDOException $e) {
+            error_log("[" . date('Y-m-d H:i:s') . "] Database error in update(): " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
      * Lấy tất cả danh mục (alias của getAll để tương thích ngược)
      * @deprecated Nên sử dụng getAll() thay thế
      */

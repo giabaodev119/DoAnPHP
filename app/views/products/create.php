@@ -64,7 +64,7 @@
                 </div>
                 
                 <button type="submit" class="btn btn-primary">Thêm sản phẩm</button>
-                <a href="index.php?controller=product&action=index" class="btn btn-secondary">Quay lại</a>
+                <a href="index.php?controller=admin&action=products" class="btn btn-secondary">Quay lại</a>
             </form>
         </div>
     </div>
