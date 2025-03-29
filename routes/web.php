@@ -14,7 +14,7 @@ $controller = isset($_GET['controller']) ? $_GET['controller'] : 'home';
 $action = isset($_GET['action']) ? $_GET['action'] : 'index';
 
 // Nạp header trước khi gọi controller
-require_once 'app/views/partials/header.php';
+
 
 // Điều hướng theo controller
 switch ($controller) {

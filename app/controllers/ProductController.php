@@ -7,44 +7,79 @@ class ProductController
 {
     public function index()
     {
+        $categoryModel = new Category();
+        $categories = $categoryModel->getAllCategories();
+        
         $productModel = new Product();
         $products = $productModel->getAllProducts();
-        require_once 'app/views/products/index.php';
-    }
-
-    public function detail($id)
-    {
-        $productModel = new Product();
-        $product = $productModel->getProductById($id);
-        require_once 'app/views/products/detail.php';
+        
+        // Thêm tên danh mục vào mỗi sản phẩm
+        foreach ($products as &$product) {
+            foreach ($categories as $category) {
+                if ($product['category_id'] == $category['id']) {
+                    $product['category_name'] = $category['name'];
+                    break;
+                }
+            }
+        }
+        
+        require_once 'app/views/admin/products.php';
     }
 
     public function create()
     {
         $categoryModel = new Category();
-        $categories = $categoryModel->getAll();
+        $categories = $categoryModel->getAllCategories();
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $name = $_POST['name'] ?? '';
+            $price = $_POST['price'] ?? 0;
+            $description = $_POST['description'] ?? '';
+            $category_id = $_POST['category_id'] ?? 0;
+
             $productModel = new Product();
-            $productId = $productModel->create($_POST['name'], $_POST['price'], $_POST['description'], $_POST['category_id']);
+            $productId = $productModel->create($name, $price, $description, $category_id);
 
             if ($productId && !empty($_FILES['images'])) {
                 $uploadDir = 'public/images/';
-                foreach ($_FILES['images']['tmp_name'] as $key => $tmp_name) {
-                    $fileName = time() . '_' . $_FILES['images']['name'][$key];
-                    $filePath = $uploadDir . $fileName;
+                if (!is_dir($uploadDir)) {
+                    mkdir($uploadDir, 0755, true);
+                }
 
-                    if (move_uploaded_file($tmp_name, $filePath)) {
-                        $productModel->addImage($productId, $fileName);
+                foreach ($_FILES['images']['tmp_name'] as $key => $tmp_name) {
+                    if ($_FILES['images']['error'][$key] === UPLOAD_ERR_OK) {
+                        $fileName = time() . '_' . basename($_FILES['images']['name'][$key]);
+                        $filePath = $uploadDir . $fileName;
+
+                        if (move_uploaded_file($tmp_name, $filePath)) {
+                            $productModel->addImage($productId, $fileName);
+                        }
                     }
                 }
             }
-            header(header: "Location: index.php?controller=product&action=create&success=1");
+            
+            header("Location: index.php?controller=product&action=index&success=1");
             exit;
         }
 
         require_once 'app/views/products/create.php';
     }
+
+    public function show($id)
+    {
+        $productModel = new Product();
+        $product = $productModel->getProductById($id);
+        
+        if (!$product) {
+            header("Location: index.php?controller=product&action=index");
+            exit;
+        }
+
+        $categoryModel = new Category();
+        $categories = $categoryModel->getAllCategories();
+
+        require_once 'app/views/products/show.php';
+}
 
     // add to cart
     public function addToCart($productId)
