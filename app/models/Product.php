@@ -9,27 +9,62 @@ class Product {
         $this->conn = $conn;
     }
 
+    // Lấy tất cả sản phẩm kèm tên danh mục
     public function getAllProducts() {
-        $stmt = $this->conn->prepare("SELECT * FROM products");
+        $stmt = $this->conn->prepare("
+            SELECT 
+                p.*, 
+                c.name AS category_name 
+            FROM 
+                products p
+            LEFT JOIN 
+                categories c 
+            ON 
+                p.category_id = c.id
+        ");
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public function getProductById($id) {
-        $stmt = $this->conn->prepare("SELECT * FROM products WHERE id = :id");
+        $stmt = $this->conn->prepare("
+            SELECT 
+                p.*, 
+                c.name AS category_name 
+            FROM 
+                products p
+            LEFT JOIN 
+                categories c 
+            ON 
+                p.category_id = c.id
+            WHERE 
+                p.id = :id
+        ");
         $stmt->bindParam(':id', $id);
         $stmt->execute();
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
     public function getFeaturedProducts() {
-        $stmt = $this->conn->prepare("SELECT * FROM products WHERE featured = 1");
+        $stmt = $this->conn->prepare("
+            SELECT 
+                p.*, 
+                c.name AS category_name 
+            FROM 
+                products p
+            LEFT JOIN 
+                categories c 
+            ON 
+                p.category_id = c.id
+            WHERE 
+                p.featured = 1
+        ");
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public function create($name, $price, $description, $category_id, $featured) {
-        $stmt = $this->conn->prepare("INSERT INTO products (name, price, description, category_id,featured) VALUES (?, ?, ?, ?, ?)");
+        $stmt = $this->conn->prepare("INSERT INTO products (name, price, description, category_id, featured) VALUES (?, ?, ?, ?, ?)");
         $stmt->execute([$name, $price, $description, $category_id, $featured]);
         return $this->conn->lastInsertId();
     }
@@ -41,9 +76,21 @@ class Product {
     
     public function searchProducts($keyword, $category)
     {
-        $sql = "SELECT * FROM products WHERE name LIKE :keyword";
+        $sql = "
+            SELECT 
+                p.*, 
+                c.name AS category_name 
+            FROM 
+                products p
+            LEFT JOIN 
+                categories c 
+            ON 
+                p.category_id = c.id
+            WHERE 
+                p.name LIKE :keyword
+        ";
         if (!empty($category)) {
-            $sql .= " AND category_id = :category";
+            $sql .= " AND p.category_id = :category";
         }
     
         $stmt = $this->conn->prepare($sql);

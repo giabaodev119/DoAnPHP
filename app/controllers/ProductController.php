@@ -5,40 +5,46 @@ require_once 'app/models/Cart.php';
 
 class ProductController
 {
+    // Hiển thị danh sách sản phẩm
     public function index()
     {
         $categoryModel = new Category();
-        $categories = $categoryModel->getAllCategories();
-        
         $productModel = new Product();
+
+        // Lấy danh sách danh mục và sản phẩm
+        $categories = $categoryModel->getAllCategories();
         $products = $productModel->getAllProducts();
-        
-        // Thêm tên danh mục vào mỗi sản phẩm
-        foreach ($products as &$product) {
-            foreach ($categories as $category) {
-                if ($product['category_id'] == $category['id']) {
-                    $product['category_name'] = $category['name'];
-                    break;
-                }
-            }
+
+        // Tạo mảng ánh xạ danh mục để tối ưu hóa
+        $categoryMap = [];
+        foreach ($categories as $category) {
+            $categoryMap[$category['id']] = $category['name'];
         }
-        
-        require_once 'app/views/admin/products.php';
+
+        // Gán tên danh mục vào từng sản phẩm
+        foreach ($products as &$product) {
+            $product['category_name'] = $categoryMap[$product['category_id']] ?? 'N/A';
+        }
+
+        // Truyền dữ liệu sang view
+        require_once 'app/views/admin/product/index.php';
     }
-    public function search() {
+
+    // Tìm kiếm sản phẩm
+    public function search()
+    {
         $keyword = isset($_GET['keyword']) ? trim($_GET['keyword']) : '';
         $category = isset($_GET['category']) ? $_GET['category'] : '';
-    
+
         // Gọi model để tìm kiếm sản phẩm
         $productModel = new Product();
         $products = $productModel->searchProducts($keyword, $category);
-    
+
         // Load giao diện kết quả tìm kiếm
         require_once 'app/views/home/search.php';
-        //var_dump($products);
-    exit();
     }
-    
+
+    // Tạo sản phẩm mới
     public function create()
     {
         $categoryModel = new Category();
@@ -49,11 +55,12 @@ class ProductController
             $price = $_POST['price'] ?? 0;
             $description = $_POST['description'] ?? '';
             $category_id = $_POST['category_id'] ?? 0;
+            $stock = $_POST['stock'] ?? 0;
 
             $productModel = new Product();
-            $stock = $_POST['stock'] ?? 0; // Assuming 'stock' is the missing argument
             $productId = $productModel->create($name, $price, $description, $category_id, $stock);
 
+            // Xử lý upload hình ảnh
             if ($productId && !empty($_FILES['images'])) {
                 $uploadDir = 'public/images/';
                 if (!is_dir($uploadDir)) {
@@ -71,19 +78,20 @@ class ProductController
                     }
                 }
             }
-            
+
             header("Location: index.php?controller=admin&action=products&success=1");
             exit;
         }
 
-        require_once 'app/views/products/create.php';
+        require_once 'app/views/admin/product/create.php';
     }
 
+    // Hiển thị chi tiết sản phẩm
     public function show($id)
     {
         $productModel = new Product();
         $product = $productModel->getProductById($id);
-        
+
         if (!$product) {
             header("Location: index.php?controller=product&action=index");
             exit;
@@ -93,9 +101,11 @@ class ProductController
         $categories = $categoryModel->getAllCategories();
 
         require_once 'app/views/products/show.php';
-}
+    }
 
-    public function edit($id) {
+    // Chỉnh sửa sản phẩm
+    public function edit($id)
+    {
         $productModel = new Product();
         $categoryModel = new Category();
 
@@ -118,34 +128,36 @@ class ProductController
             }
         }
 
-        require_once 'app/views/products/edit.php';
+        require_once 'app/views/admin/product/edit.php';
     }
 
-    // add to cart
+    // Thêm sản phẩm vào giỏ hàng
     public function addToCart($productId)
     {
         $cartModel = new Cart();
-        
-        // Check if user is logged in
+
+        // Kiểm tra người dùng đã đăng nhập chưa
         if (!isset($_SESSION['user_id'])) {
             header("Location: index.php?controller=auth&action=login");
             exit;
         }
 
-        // Get user ID from session
+        // Lấy user ID từ session
         $userId = $_SESSION['user_id'];
 
-        // Get quantity if provided, default to 1
+        // Lấy số lượng, mặc định là 1
         $quantity = isset($_POST['quantity']) ? (int)$_POST['quantity'] : 1;
 
-        // Add item to cart
+        // Thêm sản phẩm vào giỏ hàng
         $cartModel->addToCart($userId, $productId, $quantity);
-        
-        header(header: "Location: index.php?controller=cart&action=index");
+
+        header("Location: index.php?controller=cart&action=index");
         exit;
     }
 
-    public function delete($id) {
+    // Xóa sản phẩm
+    public function delete($id)
+    {
         $productModel = new Product();
 
         if ($productModel->delete($id)) {
@@ -157,13 +169,15 @@ class ProductController
         }
     }
 
-    public function detail($id) {
+    // Hiển thị chi tiết sản phẩm
+    public function detail($id)
+    {
         $productModel = new Product();
 
         $product = $productModel->getProductById($id);
         $images = $productModel->getProductImages($id);
 
-        require_once 'app/views/products/detail.php';
+        require_once 'app/views/admin/products/detail.php';
     }
 }
 ?>

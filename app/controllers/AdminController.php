@@ -10,12 +10,12 @@ class AdminController {
     public function products() {
         $productModel = new Product();
         $products = $productModel->getAllProducts();
-        require_once 'app/views/admin/products.php';
+        require_once 'app/views/admin/product/index.php';
     }
 
     public function categories() {
         $categoryModel = new Category();
         $categories = $categoryModel->getAll();
-        require_once 'app/views/admin/categories.php';
+        require_once 'app/views/admin/categories/index.php';
     }
 }
