@@ -1,10 +1,12 @@
 <?php
+
 // Nạp các controller cần thiết
 require_once 'app/controllers/HomeController.php';
 require_once 'app/controllers/ProductController.php';
 require_once 'app/controllers/CategoryController.php'; // Thêm dòng này
 require_once 'app/controllers/AdminController.php';
 require_once 'app/controllers/UserController.php';
+require_once 'app/controllers/CartController.php';
 // Có thể bổ sung thêm nếu cần: UserController, OrderController, ...
 
 // Lấy controller và action từ URL, mặc định là trang chủ
@@ -23,25 +25,43 @@ switch ($controller) {
         }
         break;
 
-        case 'product':
-            $productController = new ProductController();
-            if ($action == 'index') {
-                $productController->index();
-            } elseif ($action == 'detail' && isset($_GET['id'])) {
-                $productController->detail($_GET['id']);
-            } elseif ($action === 'create') {
-                $productController->create();
-            } elseif ($action === 'search') { // Thêm xử lý tìm kiếm
+    case 'product':
+        $productController = new ProductController();
+        if ($action == 'index') {
+            $productController->index();
+        } elseif ($action == 'detail' && isset($_GET['id'])) {
+            $productController->detail($_GET['id']);
+        } elseif ($action === 'create') {
+            $productController->create();
+        } elseif ($action === 'addToCart' && isset($_GET['id'])) {
+            $productController->addToCart($_GET['id']);
+        }
+         elseif ($action === 'search') { // Thêm xử lý tìm kiếm
                 $productController->search();
             }
-            break;
-        
+        break;
     case 'category':
         $categoryController = new CategoryController();
         if ($action === 'create') {
             $categoryController->create();
         }
         break;
+
+    case 'cart':
+        $cartController = new CartController();
+        if ($action === 'index') {
+            $cartController->index();
+        } elseif ($action === 'remove') {
+            $cartController->remove();
+        } elseif ($action === 'update') {
+            $cartController->update();
+        }
+        elseif ($action === 'clear'){
+            $cartController->clear();
+        } 
+        
+        break;
+
 
     // Bạn có thể thêm các controller khác tại đây:
 
@@ -68,7 +88,7 @@ switch ($controller) {
             $adminController->categories();
         }
         break;
-    
+
 }
 // Nạp footer sau khi gọi controller
 require_once 'app/views/partials/footer.php';

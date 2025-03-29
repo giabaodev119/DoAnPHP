@@ -19,5 +19,10 @@
     <label>Hình ảnh (chọn nhiều):</label><br>
     <input type="file" name="images[]" multiple><br><br>
 
+    <div class="mb-3 form-check">
+    <input type="checkbox" class="form-check-input" id="featured" name="featured" value="1">
+    <label class="form-check-label" for="featured">🔥 Đánh dấu là mặt hàng yêu thích</label>
+    </div>
+
     <button type="submit">Thêm sản phẩm</button>
 </form>
