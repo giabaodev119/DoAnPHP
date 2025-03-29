@@ -8,7 +8,7 @@ class CategoryController {
         $categories = $categoryModel->getAll();
 
         // Truyền dữ liệu vào view
-        require_once 'app/views/admin/categories.php';
+        require_once 'app/views/admin/categories/index.php';
     }
 
     public function create() {
@@ -31,7 +31,7 @@ class CategoryController {
         }
 
         // Truyền lỗi (nếu có) vào view
-        require_once 'app/views/categories/create.php';
+        require_once 'app/views/admin/categories/create.php';
     }
 
     public function delete($id) {
@@ -67,7 +67,7 @@ class CategoryController {
         }
 
         // Truyền dữ liệu vào view
-        require_once 'app/views/categories/edit.php';
+        require_once 'app/views/admin/categories/edit.php';
     }
 }
 ?>
