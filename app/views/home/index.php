@@ -9,10 +9,13 @@
 </head>
 
 <body>
-
+<?php
+    require_once 'app/views/partials/header.php';
+?>
 
     <section class="banner">
         Chào mừng đến với cửa hàng công nghệ!
+
     </section>
 
 <section class="products">
