@@ -42,7 +42,7 @@ class UserController
 
             // ✅ Nếu không có lỗi, kiểm tra email có tồn tại không
             if (empty($errors)) {
-                $stmt = $GLOBALS['conn']->prepare("SELECT id, name,role, password FROM users WHERE email = ?");
+                $stmt = $GLOBALS['conn']->prepare("SELECT id, name, role, password FROM users WHERE email = ?");
                 $stmt->execute([$email]);
                 $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -120,11 +120,11 @@ class UserController
             }
 
             // ✅ Kiểm tra email đã tồn tại nếu không có lỗi trước đó
-                $stmt = $GLOBALS['conn']->prepare("SELECT id FROM users WHERE email = ?");
-                $stmt->execute([$email]);
-                if ($stmt->rowCount() > 0) {
-                    $errors['email'] = "Email đã tồn tại.";
-                }
+            $stmt = $GLOBALS['conn']->prepare("SELECT id FROM users WHERE email = ?");
+            $stmt->execute([$email]);
+            if ($stmt->rowCount() > 0) {
+                $errors['email'] = "Email đã tồn tại.";
+            }
             // ✅ Nếu không có lỗi, thực hiện đăng ký
             if (empty($errors)) {
                 $hashedPassword = password_hash($password, PASSWORD_BCRYPT);

@@ -1,5 +1,5 @@
 <h2>Thêm sản phẩm mới</h2>
-<form action="" method="post" enctype="multipart/form-data">
+<form action="index.php?controller=product&action=create" method="post" enctype="multipart/form-data">
     <label>Tên sản phẩm:</label><br>
     <input type="text" name="name" required><br>
 

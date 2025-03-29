@@ -28,12 +28,13 @@
         <label for="description">Mô tả:</label>
         <textarea name="description" id="description" rows="3"></textarea>
 
-        <label for="category">Danh mục:</label>
-        <select name="category_id" id="category" required>
-            <?php foreach ($categories as $cat): ?>
-                <option value="<?= $cat['id'] ?>"><?= $cat['name'] ?></option>
-            <?php endforeach; ?>
-        </select>
+        <label>Danh mục:</label><br>
+    <select name="category_id" required>
+        <?php foreach ($categories as $cat): ?>
+            <option value="<?= $cat['id'] ?>"><?= $cat['name'] ?></option>
+        <?php endforeach; ?>
+    </select><br>
+        
 
         <label for="images">Hình ảnh (nhiều):</label>
         <input type="file" name="images[]" id="images" multiple>
