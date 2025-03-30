@@ -53,7 +53,7 @@
                       </a>
                     </li>
                     <li>
-                      <a href="components/gridsystem.html">
+                      <a href="index.php?controller=admin&action=users">
                         <span class="sub-item">Người Dùng</span>
                       </a>
                     </li>

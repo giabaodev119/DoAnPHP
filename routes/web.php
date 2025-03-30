@@ -90,16 +90,24 @@ switch ($controller) {
         break;
 
     // case 'order':
-    case 'admin':
-        $adminController = new AdminController();
-        if ($action === 'dashboard') {
-            $adminController->dashboard();
-        } elseif ($action === 'products') {
-            $adminController->products();
-        } elseif ($action === 'categories') {
-            $adminController->categories();
-        }
-        break;
+ case 'admin':
+    $adminController = new AdminController();
+    if ($action === 'dashboard') {
+        $adminController->dashboard();
+    } elseif ($action === 'products') {
+        $adminController->products();
+    } elseif ($action === 'categories') {
+        $adminController->categories();
+    } elseif ($action === 'users') {
+        $adminController->users();
+    } elseif ($action === 'banUser') { // Route cho banUser
+        $userController = new UserController();
+        $userController->banUser();
+    } elseif ($action === 'unbanUser') { // Route cho unbanUser
+        $userController = new UserController();
+        $userController->unbanUser();
+    }
+    break;
 
 }
 // Nạp footer sau khi gọi controller
