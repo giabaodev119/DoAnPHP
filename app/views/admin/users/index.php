@@ -169,27 +169,29 @@
                               </span>
                             </td>
                             <td><?= date('d/m/Y', strtotime($user['created_at'])) ?></td>
-                            <td>
-                              <div class="d-flex">
-                                <?php if ($user['status'] === 'active'): ?>
-                                  <a href="index.php?controller=admin&action=banUser&id=<?= $user['id'] ?>" 
-                                    class="btn btn-danger btn-sm action-btn" 
-                                    onclick="return confirm('Bạn chắc chắn muốn khóa tài khoản này?')">
-                                    <i class="fas fa-lock me-1"></i> Khóa
-                                  </a>
-                                <?php else: ?>
-                                  <a href="index.php?controller=admin&action=unbanUser&id=<?= $user['id'] ?>" 
-                                    class="btn btn-success btn-sm action-btn" 
-                                    onclick="return confirm('Bạn chắc chắn muốn mở khóa tài khoản này?')">
-                                    <i class="fas fa-unlock me-1"></i> Mở khóa
-                                  </a>
-                                <?php endif; ?>
-                                <a href="index.php?controller=admin&action=editUser&id=<?= $user['id'] ?>" 
-                                  class="btn btn-info btn-sm action-btn ms-1">
-                                  <i class="fas fa-edit me-1"></i> Sửa
-                                </a>
-                              </div>
-                            </td>
+                           <td>
+  <div class="d-flex">
+    <?php if ($user['role'] !== 'admin'): ?>
+      <?php if ($user['status'] === 'active'): ?>
+        <a href="index.php?controller=admin&action=banUser&id=<?= $user['id'] ?>" 
+          class="btn btn-danger btn-sm action-btn" 
+          onclick="return confirm('Bạn chắc chắn muốn khóa tài khoản này?')">
+          <i class="fas fa-lock me-1"></i> Khóa
+        </a>
+      <?php else: ?>
+        <a href="index.php?controller=admin&action=unbanUser&id=<?= $user['id'] ?>" 
+          class="btn btn-success btn-sm action-btn" 
+          onclick="return confirm('Bạn chắc chắn muốn mở khóa tài khoản này?')">
+          <i class="fas fa-unlock me-1"></i> Mở khóa
+        </a>
+      <?php endif; ?>
+    <?php endif; ?>
+    <a href="index.php?controller=admin&action=editUser&id=<?= $user['id'] ?>" 
+      class="btn btn-info btn-sm action-btn ms-1">
+      <i class="fas fa-edit me-1"></i> Sửa
+    </a>
+  </div>
+</td>
                           </tr>
                         <?php endforeach; ?>
                       <?php else: ?>
