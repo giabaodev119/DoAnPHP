@@ -35,16 +35,5 @@
             </ul>
         </div>
     </nav>
-    <div class="container mt-4">
-        <?php
-        // Debug session data (remove in production)
-        if (!empty($_SESSION['logged_in'])) {
-            echo '<div style="background:#dff0d8;padding:5px;text-align:center;">
-                Logged in as: ' . htmlspecialchars($_SESSION['user_name']) . 
-                ' (Role: ' . htmlspecialchars($_SESSION['user_role']) . ')
-            </div>';
-        }
-        ?>
-    </div>
 </body>
 </html>

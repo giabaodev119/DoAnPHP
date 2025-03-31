@@ -118,5 +118,31 @@ class Product {
         $stmt->execute([$product_id]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    public function getRelatedProducts($category_id, $current_product_id, $limit = 4) {
+        // Sử dụng tham số có tên để tránh lỗi với mệnh đề LIMIT
+        $stmt = $this->conn->prepare("
+            SELECT 
+                p.*, 
+                c.name AS category_name,
+                (SELECT image_path FROM product_images WHERE product_id = p.id LIMIT 1) AS image_path
+            FROM 
+                products p
+            LEFT JOIN 
+                categories c 
+            ON 
+                p.category_id = c.id
+            WHERE 
+                p.category_id = :category_id AND p.id != :product_id
+            LIMIT :limit
+        ");
+        
+        $stmt->bindParam(':category_id', $category_id, PDO::PARAM_INT);
+        $stmt->bindParam(':product_id', $current_product_id, PDO::PARAM_INT);
+        $stmt->bindParam(':limit', $limit, PDO::PARAM_INT); // Chỉ định rõ là tham số số nguyên
+        
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }
 ?>

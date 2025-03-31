@@ -15,8 +15,9 @@ class Cart {
     public function getCartItems($user_id) {
         $stmt = $this->conn->prepare("
             SELECT c.id as cart_id, c.quantity, p.id as product_id, p.name as product_name, 
-                   p.price, p.image, p.description, cat.name as category_name,
-                   (SELECT image_path FROM product_images WHERE product_id = p.id LIMIT 1) as image_path
+                   p.price, 
+                   (SELECT image_path FROM product_images WHERE product_id = p.id LIMIT 1) as image_path,
+                   p.description, cat.name as category_name
             FROM cart c
             JOIN products p ON c.product_id = p.id
             LEFT JOIN categories cat ON p.category_id = cat.id

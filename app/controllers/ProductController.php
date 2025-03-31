@@ -26,8 +26,16 @@ class ProductController
             $product['category_name'] = $categoryMap[$product['category_id']] ?? 'N/A';
         }
 
+        // Thực hiện tìm kiếm nếu có
+        $keyword = $_GET['keyword'] ?? '';
+        $categoryId = $_GET['category'] ?? '';
+        
+        if (!empty($keyword) || !empty($categoryId)) {
+            $products = $productModel->searchProducts($keyword, $categoryId);
+        }
+
         // Truyền dữ liệu sang view
-        require_once 'app/views/admin/product/index.php';
+        require_once 'app/views/products/index.php';
     }
 
     // Tìm kiếm sản phẩm
@@ -169,8 +177,8 @@ class ProductController
         }
     }
 
-    // Hiển thị chi tiết sản phẩm
-    public function detail($id)
+    // Hiển thị chi tiết sản phẩm trong admin
+    public function detailAdmin($id)
     {
         $productModel = new Product();
 
@@ -178,6 +186,16 @@ class ProductController
         $images = $productModel->getProductImages($id);
 
         require_once 'app/views/admin/products/detail.php';
+    }
+    //Hiển thị chi tiết sản phẩm trong trang người dùng
+    public function detail($id)
+    {
+        $productModel = new Product();
+
+        $product = $productModel->getProductById($id);
+        $images = $productModel->getProductImages($id);
+        $relatedProducts = $productModel->getRelatedProducts($product['category_id'], $id);
+        require_once 'app/views/products/detail.php';
     }
 }
 ?>
