@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <title>Admin Dashboard - Quản lý danh mục</title>
+    <title>Admin Dashboard</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no" />
     <link rel="icon" href="public/img/kaiadmin/favicon.ico" type="image/x-icon" />
 
@@ -34,29 +34,43 @@
     <link rel="stylesheet" href="public/css/demo.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <style>
-      .category-table {
+      .user-table {
           box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
           border-radius: 10px;
           overflow: hidden;
       }
-      .category-table thead {
+      .user-table thead {
           background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
           color: white;
       }
-      .category-table th {
+      .user-table th {
           padding: 15px;
           font-weight: 500;
       }
-      .category-table td {
+      .user-table td {
           vertical-align: middle;
           padding: 12px 15px;
       }
-      .category-table tbody tr {
+      .user-table tbody tr {
           transition: all 0.3s ease;
       }
-      .category-table tbody tr:hover {
+      .user-table tbody tr:hover {
           background-color: #f8f9fa;
           transform: translateX(5px);
+      }
+      .status-badge {
+          padding: 5px 10px;
+          border-radius: 20px;
+          font-size: 0.8rem;
+          font-weight: 500;
+      }
+      .status-active {
+          background-color: #d1fae5;
+          color: #065f46;
+      }
+      .status-banned {
+          background-color: #fee2e2;
+          color: #b91c1c;
       }
       .action-btn {
           min-width: 90px;
@@ -64,6 +78,17 @@
       }
       .table-responsive {
           border-radius: 10px;
+      }
+      .avatar-sm {
+          width: 32px;
+          height: 32px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+      }
+      .avatar-title {
+          color: white;
+          font-weight: bold;
       }
     </style>
   </head>
@@ -77,59 +102,101 @@
         <div class="content">
           <div class="container-fluid">
             <div class="d-flex justify-content-between align-items-center mb-4">
-              <h2><i class="fas fa-tags me-2"></i>Quản lý danh mục</h2>
-              <a href="index.php?controller=category&action=create" class="btn btn-success">
-                <i class="fas fa-plus me-1"></i> Thêm danh mục
+              <h2><i class="fas fa-users me-2"></i>Quản lý người dùng</h2>
+              <a href="index.php?controller=admin&action=createUser" class="btn btn-success">
+                <i class="fas fa-plus me-1"></i> Thêm người dùng
               </a>
             </div>
             
-            <?php if (isset($_GET['success']) && $_GET['success'] == 1): ?>
+            <?php if (isset($_SESSION['message'])): ?>
               <div class="alert alert-success alert-dismissible fade show" role="alert">
-                Danh mục đã được thêm/cập nhật thành công!
+                <?= $_SESSION['message'] ?>
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
               </div>
-            <?php elseif (isset($_GET['error']) && $_GET['error'] == 1): ?>
+              <?php unset($_SESSION['message']); ?>
+            <?php endif; ?>
+            
+            <?php if (isset($_SESSION['error'])): ?>
               <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                Có lỗi xảy ra. Vui lòng thử lại.
+                <?= $_SESSION['error'] ?>
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
               </div>
+              <?php unset($_SESSION['error']); ?>
             <?php endif; ?>
             
             <div class="card shadow-sm">
               <div class="card-body">
                 <div class="table-responsive">
-                  <table class="table table-hover category-table mb-0">
+                  <table class="table table-hover user-table mb-0">
                     <thead>
                       <tr>
                         <th><i class="fas fa-hashtag me-1"></i> ID</th>
-                        <th><i class="fas fa-tag me-1"></i> Tên danh mục</th>
+                        <th><i class="fas fa-user me-1"></i> Tên</th>
+                        <th><i class="fas fa-envelope me-1"></i> Email</th>
+                        <th><i class="fas fa-user-tag me-1"></i> Vai trò</th>
+                        <th><i class="fas fa-circle-info me-1"></i> Trạng thái</th>
+                        <th><i class="fas fa-calendar-day me-1"></i> Ngày tạo</th>
                         <th><i class="fas fa-bolt me-1"></i> Hành động</th>
                       </tr>
                     </thead>
                     <tbody>
-                      <?php if (!empty($categories)): ?>
-                        <?php foreach ($categories as $cat): ?>
+                      <?php if (!empty($users)): ?>
+                        <?php foreach ($users as $user): ?>
                           <tr>
-                            <td>#<?= htmlspecialchars($cat['id']) ?></td>
-                            <td><?= htmlspecialchars($cat['name']) ?></td>
+                            <td>#<?= htmlspecialchars($user['id']) ?></td>
                             <td>
-                              <div class="d-flex">
-                                <a href="index.php?controller=category&action=edit&id=<?= $cat['id'] ?>" 
-                                  class="btn btn-info btn-sm action-btn">
-                                  <i class="fas fa-edit me-1"></i> Sửa
-                                </a>
-                                <a href="index.php?controller=category&action=delete&id=<?= $cat['id'] ?>" 
-                                  class="btn btn-danger btn-sm action-btn ms-1"
-                                  onclick="return confirm('Bạn có chắc chắn muốn xóa danh mục này?')">
-                                  <i class="fas fa-trash me-1"></i> Xóa
-                                </a>
+                              <div class="d-flex align-items-center">
+                                <div class="avatar-sm me-2">
+                                  <span class="avatar-title bg-primary rounded-circle">
+                                    <?= strtoupper(substr($user['name'], 0, 1)) ?>
+                                  </span>
+                                </div>
+                                <div>
+                                  <?= htmlspecialchars($user['name']) ?>
+                                </div>
                               </div>
                             </td>
+                            <td><?= htmlspecialchars($user['email']) ?></td>
+                            <td>
+                              <span class="badge <?= $user['role'] === 'admin' ? 'bg-primary' : 'bg-secondary' ?>">
+                                <?= htmlspecialchars($user['role']) ?>
+                              </span>
+                            </td>
+                            <td>
+                              <span class="status-badge <?= $user['status'] === 'banned' ? 'status-banned' : 'status-active' ?>">
+                                <i class="fas <?= $user['status'] === 'banned' ? 'fa-lock' : 'fa-check-circle' ?> me-1"></i>
+                                <?= $user['status'] === 'banned' ? 'Đã khóa' : 'Hoạt động' ?>
+                              </span>
+                            </td>
+                            <td><?= date('d/m/Y', strtotime($user['created_at'])) ?></td>
+                           <td>
+  <div class="d-flex">
+    <?php if ($user['role'] !== 'admin'): ?>
+      <?php if ($user['status'] === 'active'): ?>
+        <a href="index.php?controller=admin&action=banUser&id=<?= $user['id'] ?>" 
+          class="btn btn-danger btn-sm action-btn" 
+          onclick="return confirm('Bạn chắc chắn muốn khóa tài khoản này?')">
+          <i class="fas fa-lock me-1"></i> Khóa
+        </a>
+      <?php else: ?>
+        <a href="index.php?controller=admin&action=unbanUser&id=<?= $user['id'] ?>" 
+          class="btn btn-success btn-sm action-btn" 
+          onclick="return confirm('Bạn chắc chắn muốn mở khóa tài khoản này?')">
+          <i class="fas fa-unlock me-1"></i> Mở khóa
+        </a>
+      <?php endif; ?>
+    <?php endif; ?>
+    <a href="index.php?controller=admin&action=editUser&id=<?= $user['id'] ?>" 
+      class="btn btn-info btn-sm action-btn ms-1">
+      <i class="fas fa-edit me-1"></i> Sửa
+    </a>
+  </div>
+</td>
                           </tr>
                         <?php endforeach; ?>
                       <?php else: ?>
                         <tr>
-                          <td colspan="3" class="text-center">Không có danh mục nào</td>
+                          <td colspan="7" class="text-center">Không có người dùng nào</td>
                         </tr>
                       <?php endif; ?>
                     </tbody>
