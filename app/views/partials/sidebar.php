@@ -63,6 +63,11 @@
                       <a class="nav-link <?= isset($_GET['action']) && $_GET['action'] == 'orders' ? 'active' : '' ?>" href="index.php?controller=admin&action=orders">
                         <i class="fas fa-shopping-bag me-2"></i>
                         Đơn hàng
+                     <li>
+                      <a href="index.php?controller=admin&action=banners">
+                        <span class="sub-item">Banner</span>
+                      </a>
+                    </li>
                       </a>
                     </li>
                   </ul>

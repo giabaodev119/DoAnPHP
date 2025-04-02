@@ -181,4 +181,23 @@ class Product
         $stmt->execute([$productId, $quantity]);
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
+
+public function getProductsByPage($limit, $offset)
+{
+    try {
+        $stmt = $this->conn->prepare("
+            SELECT p.*, c.name AS category_name 
+            FROM products p
+            LEFT JOIN categories c ON p.category_id = c.id
+            ORDER BY p.id DESC
+            LIMIT ? OFFSET ?
+        ");
+        $stmt->bindValue(1, $limit, PDO::PARAM_INT);
+        $stmt->bindValue(2, $offset, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        return [];
+    }
+}
 }

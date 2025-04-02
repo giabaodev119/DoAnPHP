@@ -179,19 +179,23 @@
                 </div>
 
                 <!-- Phân trang -->
-                <nav class="mt-4">
-                  <ul class="pagination justify-content-center">
-                    <li class="page-item disabled">
-                      <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Trước</a>
-                    </li>
-                    <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                    <li class="page-item"><a class="page-link" href="#">2</a></li>
-                    <li class="page-item"><a class="page-link" href="#">3</a></li>
-                    <li class="page-item">
-                      <a class="page-link" href="#">Tiếp</a>
-                    </li>
-                  </ul>
-                </nav>
+                <!-- filepath: c:\xampp\htdocs\DoAnPHP\app\views\admin\product\index.php -->
+<!-- Phân trang -->
+<nav class="mt-4">
+  <ul class="pagination justify-content-center">
+    <li class="page-item <?= $currentPage <= 1 ? 'disabled' : '' ?>">
+      <a class="page-link" href="index.php?controller=product&action=index&page=<?= $currentPage - 1 ?>" tabindex="-1">Trước</a>
+    </li>
+    <?php for ($i = 1; $i <= $productTotalPages; $i++): ?>
+      <li class="page-item <?= $i == $currentPage ? 'active' : '' ?>">
+        <a class="page-link" href="index.php?controller=product&action=index&page=<?= $i ?>"><?= $i ?></a>
+      </li>
+    <?php endfor; ?>
+    <li class="page-item <?= $currentPage >= $productTotalPages ? 'disabled' : '' ?>">
+      <a class="page-link" href="index.php?controller=product&action=index&page=<?= $currentPage + 1 ?>">Tiếp</a>
+    </li>
+  </ul>
+</nav>
               </div>
             </div>
           </div>

@@ -3,7 +3,7 @@ require_once 'app/models/Product.php';
 require_once 'app/models/Category.php';
 require_once 'app/models/User.php'; // Thêm dòng này để nạp lớp User
 require_once 'app/models/Order.php';
-
+require_once 'app/models/Banner.php';
 class AdminController
 {
     public function __construct()
@@ -128,3 +128,11 @@ class AdminController
         exit;
     }
 }
+
+  public function banners() {
+    $bannerModel = new SideBanner();
+    $banners = $bannerModel->getAllBanners();
+    require_once 'app/views/admin/banner/index.php';
+}
+}
+
