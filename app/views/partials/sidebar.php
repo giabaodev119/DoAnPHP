@@ -8,8 +8,7 @@
                 src="public/img/kaiadmin/logo_light.svg"
                 alt="navbar brand"
                 class="navbar-brand"
-                height="20"
-              />
+                height="20" />
             </a>
             <div class="nav-toggle">
               <button class="btn btn-toggle toggle-sidebar">
@@ -42,24 +41,28 @@
                 </a>
                 <div class="collapse" id="base">
                   <ul class="nav nav-collapse">
-                    <li>
-                      <a href="index.php?controller=admin&action=categories">
-                        <span class="sub-item">Phân Loại</span>
+                    <li class="nav-item">
+                      <a class="nav-link" href="index.php?controller=admin&action=categories">
+                        <i class="fas fa-tags me-2"></i>
+                        Phân Loại
                       </a>
                     </li>
-                    <li>
-                      <a href="index.php?controller=admin&action=products">
-                        <span class="sub-item">Sản Phẩm</span>
+                    <li class="nav-item">
+                      <a class="nav-link" href="index.php?controller=admin&action=products">
+                        <i class="fas fa-box me-2"></i>
+                        Sản phẩm
                       </a>
                     </li>
-                    <li>
-                      <a href="index.php?controller=admin&action=users">
-                        <span class="sub-item">Người Dùng</span>
+                    <li class="nav-item">
+                      <a class="nav-link" href="index.php?controller=admin&action=users">
+                        <i class="fas fa-users me-2"></i>
+                        Người dùng
                       </a>
                     </li>
-                    <li>
-                      <a href="components/panels.html">
-                        <span class="sub-item">Đơn Hàng</span>
+                    <li class="nav-item">
+                      <a class="nav-link <?= isset($_GET['action']) && $_GET['action'] == 'orders' ? 'active' : '' ?>" href="index.php?controller=admin&action=orders">
+                        <i class="fas fa-shopping-bag me-2"></i>
+                        Đơn hàng
                       </a>
                     </li>
                   </ul>
@@ -70,5 +73,3 @@
         </div>
       </div>
       <!-- End Sidebar -->
-       
-       
