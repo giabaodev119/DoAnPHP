@@ -127,12 +127,10 @@ class AdminController
         header('Location: index.php?controller=admin&action=orderDetail&id=' . $orderId);
         exit;
     }
+    public function banners()
+    {
+        $bannerModel = new Banner();
+        $banners = $bannerModel->getAllBanners();
+        require_once 'app/views/admin/banner/index.php';
+    }
 }
-
-  public function banners() {
-    $bannerModel = new SideBanner();
-    $banners = $bannerModel->getAllBanners();
-    require_once 'app/views/admin/banner/index.php';
-}
-}
-
