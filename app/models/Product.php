@@ -155,15 +155,32 @@ class Product
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
- public function getTotalProducts()
-{
-    try {
-        $stmt = $this->conn->query("SELECT COUNT(*) FROM products");
-        return $stmt->fetchColumn();
-    } catch (PDOException $e) {
-        return 0;
+
+    /**
+     * Giảm số lượng tồn kho của sản phẩm
+     * @param int $productId ID của sản phẩm
+     * @param int $quantity Số lượng cần giảm
+     * @return bool True nếu cập nhật thành công, False nếu thất bại
+     */
+    public function decreaseStock($productId, $quantity)
+    {
+        $stmt = $this->conn->prepare("UPDATE products SET stock = stock - ? WHERE id = ? AND stock >= ?");
+        $stmt->execute([$quantity, $productId, $quantity]);
+        return $stmt->rowCount() > 0;
     }
-}
+
+    /**
+     * Kiểm tra số lượng tồn kho trước khi đặt hàng
+     * @param int $productId ID của sản phẩm
+     * @param int $quantity Số lượng cần kiểm tra
+     * @return array|bool Thông tin sản phẩm nếu đủ tồn kho, False nếu không đủ
+     */
+    public function checkStock($productId, $quantity)
+    {
+        $stmt = $this->conn->prepare("SELECT * FROM products WHERE id = ? AND stock >= ?");
+        $stmt->execute([$productId, $quantity]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
 
 public function getProductsByPage($limit, $offset)
 {
