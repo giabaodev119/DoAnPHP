@@ -57,6 +57,11 @@
                         <span class="sub-item">Người Dùng</span>
                       </a>
                     </li>
+                     <li>
+                      <a href="index.php?controller=admin&action=banners">
+                        <span class="sub-item">Banner</span>
+                      </a>
+                    </li>
                     <li>
                       <a href="components/panels.html">
                         <span class="sub-item">Đơn Hàng</span>
