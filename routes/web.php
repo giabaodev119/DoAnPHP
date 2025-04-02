@@ -7,6 +7,7 @@ require_once 'app/controllers/CategoryController.php'; // Thêm dòng này
 require_once 'app/controllers/AdminController.php';
 require_once 'app/controllers/UserController.php';
 require_once 'app/controllers/CartController.php';
+require_once 'app/controllers/OrderController.php';
 // Có thể bổ sung thêm nếu cần: UserController, OrderController, ...
 
 // Lấy controller và action từ URL, mặc định là trang chủ
@@ -70,10 +71,10 @@ switch ($controller) {
         }
         elseif ($action === 'clear'){
             $cartController->clear();
-        } 
-        
+        }
         break;
 
+    
 
     // Bạn có thể thêm các controller khác tại đây:
 
@@ -89,6 +90,21 @@ switch ($controller) {
         }
         break;
 
+
+    case 'order':
+        $orderController = new OrderController();
+        if($action === 'checkout'){
+            $orderController->checkout();
+        } elseif ($action === 'details'){
+            $orderController->details();
+        }elseif ($action === 'history'){
+            $orderController->history();
+        }elseif ($action === 'payment'){
+            $orderController->payment();
+        }elseif ($action === 'checkoutWithVNPAY'){
+            $orderController->checkoutWithVNPAY();
+        }
+        break;
     // case 'order':
  case 'admin':
     $adminController = new AdminController();
