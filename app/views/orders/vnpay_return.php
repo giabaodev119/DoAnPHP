@@ -139,7 +139,7 @@
                 </tbody>
             </table>
         <?php endif; ?>
-        <a href="../../index.php">Về trang chủ</a>
+        <a href="http://localhost/DoAnPHP/index.php">Về trang chủ</a>
 
     </div>
 
