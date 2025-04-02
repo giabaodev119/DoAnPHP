@@ -8,36 +8,32 @@
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <a class="navbar-brand" href="#">Website</a>
+        <a class="navbar-brand" href="index.php?controller=home&action=index">Website</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav">
+            <ul class="navbar-nav ml-auto">
                 <li class="nav-item">
-                    <a class="nav-link" href="index.php?controller=admin&action=products">Danh sách sản phẩm</a>
+                    <a class="nav-link" href="index.php?controller=cart&action=index">Giỏ hàng</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="index.php?controller=cart&action=view">Giỏ hàng</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link btn btn-primary" href="index.php?controller=user&action=login">Đăng nhập</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link btn btn-success" href="index.php?controller=user&action=register">Đăng ký</a>
-                </li>
+                <?php if (!empty($_SESSION['logged_in'])): ?>
+                    <li class="nav-item">
+                        <span class="nav-link">Xin chào, <?= htmlspecialchars($_SESSION['user_name']) ?></span>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link btn btn-danger" href="index.php?controller=user&action=logout">Đăng xuất</a>
+                    </li>
+                <?php else: ?>
+                    <li class="nav-item">
+                        <a class="nav-link btn btn-primary" href="index.php?controller=user&action=login">Đăng nhập</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link btn btn-success" href="index.php?controller=user&action=register">Đăng ký</a>
+                    </li>
+                <?php endif; ?>
             </ul>
         </div>
     </nav>
-    <div class="container mt-4"> 
-
-    <?php
-// Add this to your header.php file, near the top before HTML output
-// Debug session data (remove in production)
-if (!empty($_SESSION['logged_in'])) {
-    echo '<div style="background:#dff0d8;padding:5px;text-align:center;">
-        Logged in as: ' . htmlspecialchars($_SESSION['user_name']) . 
-        ' (Role: ' . htmlspecialchars($_SESSION['user_role']) . ')
-    </div>';
-}
-?>
+</body>
+</html>

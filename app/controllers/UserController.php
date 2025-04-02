@@ -18,74 +18,76 @@ class UserController
             session_start();
         }
     }
-    public function login()
-    {
+ public function login() {
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $errors = [];
 
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $errors = [];
+        $email = trim($_POST['email'] ?? '');
+        $password = $_POST['password'] ?? '';
 
-            $email = trim($_POST['email'] ?? '');
-            $password = $_POST['password'] ?? '';
+        // Kiểm tra dữ liệu rỗng
+        if (empty($email)) {
+            $errors['email'] = "Vui lòng nhập email.";
+        }
+        if (empty($password)) {
+            $errors['password'] = "Vui lòng nhập mật khẩu.";
+        }
 
-            // ✅ Kiểm tra dữ liệu rỗng
-            if (empty($email)) {
-                $errors['email'] = "Vui lòng nhập email.";
-            }
-            if (empty($password)) {
-                $errors['password'] = "Vui lòng nhập mật khẩu.";
-            }
+        // Kiểm tra định dạng email
+        if (!empty($email) && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $errors['email'] = "Email không hợp lệ.";
+        }
 
-            // ✅ Kiểm tra định dạng email
-            if (!empty($email) && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
-                $errors['email'] = "Email không hợp lệ.";
-            }
+        // Nếu không có lỗi, kiểm tra email có tồn tại không
+        if (empty($errors)) {
+            // Cập nhật câu truy vấn để lấy cả trạng thái
+            $stmt = $GLOBALS['conn']->prepare("SELECT id, name, role, password, status FROM users WHERE email = ?");
+            $stmt->execute([$email]);
+            $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-            // ✅ Nếu không có lỗi, kiểm tra email có tồn tại không
-            if (empty($errors)) {
-                $stmt = $GLOBALS['conn']->prepare("SELECT id, name,role, password FROM users WHERE email = ?");
-                $stmt->execute([$email]);
-                $user = $stmt->fetch(PDO::FETCH_ASSOC);
-
-                if ($user && password_verify($password, $user['password'])) {
-                    // ✅ Đăng nhập thành công
+            if ($user) {
+                // Kiểm tra tài khoản có bị khóa không
+                if ($user['status'] === 'banned') {
+                    $errors['login'] = "Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên.";
+                } 
+                // Kiểm tra mật khẩu
+                elseif (password_verify($password, $user['password'])) {
+                    // Đăng nhập thành công
                     $_SESSION['user_id'] = $user['id'];
                     $_SESSION['user_name'] = $user['name'];
                     $_SESSION['user_role'] = $user['role'];
                     $_SESSION['logged_in'] = true;
-                    
-                    // Force session write
-                    session_write_close();
-                    
-                    // Restart session to verify data was saved
-                    session_start();
-                    
-                    // Redirect based on role
+
+                    // Chuyển hướng dựa trên vai trò
                     if ($user['role'] === 'admin') {
                         header("Location: index.php?controller=admin&action=dashboard");
                     } else {
-                        header("Location: index.php"); // Chuyển về trang chủ
+                        header("Location: index.php");
                     }
                     exit();
                 } else {
-                    // ❌ Email hoặc mật khẩu sai
+                    // Email hoặc mật khẩu sai
                     $errors['login'] = "Email hoặc mật khẩu không đúng.";
                 }
-            }
-
-            // ✅ Lưu lỗi vào SESSION và chuyển hướng lại form đăng nhập
-            if (!empty($errors)) {
-                $_SESSION['errors'] = $errors;
-                header("Location: index.php?controller=user&action=login");
-                exit();
+            } else {
+                $errors['login'] = "Email hoặc mật khẩu không đúng.";
             }
         }
 
-        // ✅ Nếu có lỗi từ trước thì lấy từ SESSION
-        $errors = $_SESSION['errors'] ?? [];
-        unset($_SESSION['errors']);
-
-        require_once 'app/views/users/login.php';
+        // Lưu lỗi vào SESSION và chuyển hướng lại form đăng nhập
+        if (!empty($errors)) {
+            $_SESSION['errors'] = $errors;
+            header("Location: index.php?controller=user&action=login");
+            exit();
+        }
     }
+
+    // Hiển thị lỗi nếu có
+    $errors = $_SESSION['errors'] ?? [];
+    unset($_SESSION['errors']);
+
+    require_once 'app/views/users/login.php';
+}
 
 
     public function register()
@@ -139,8 +141,51 @@ class UserController
         // ✅ Hiển thị giao diện đăng ký
         require_once 'app/views/users/register.php';
     }
+// Thêm các phương thức mới vào class AdminController
 
+ public function banUser() {
+    // Kiểm tra quyền admin
+    if ($_SESSION['user_role'] !== 'admin') {
+        header("Location: index.php?controller=admin&action=dashboard");
+        exit();
+    }
 
+    if (isset($_GET['id'])) {
+        $userId = $_GET['id'];
+        $userModel = new User();
+        
+        if ($userModel->banUser($userId)) {
+            $_SESSION['message'] = "Đã khóa tài khoản thành công";
+        } else {
+            $_SESSION['error'] = "Khóa tài khoản thất bại";
+        }
+    }
+    
+    header("Location: index.php?controller=admin&action=users");
+    exit();
+}
+
+public function unbanUser() {
+    // Kiểm tra quyền admin
+    if ($_SESSION['user_role'] !== 'admin') {
+        header("Location: index.php?controller=admin&action=dashboard");
+        exit();
+    }
+
+    if (isset($_GET['id'])) {
+        $userId = $_GET['id'];
+        $userModel = new User();
+        
+        if ($userModel->unbanUser($userId)) {
+            $_SESSION['message'] = "Đã mở khóa tài khoản thành công";
+        } else {
+            $_SESSION['error'] = "Mở khóa tài khoản thất bại";
+        }
+    }
+    
+    header("Location: index.php?controller=admin&action=users");
+    exit();
+}
 
     public function logout()
     {

@@ -39,9 +39,8 @@ $cartTotal = $data['cart_total'] ?? 0;
                             <tr>
                                 <td>
                                     <div class="d-flex align-items-center">
-                                        <?php if (!empty($item->image_path)): ?>
-                                            <img src="<?php echo $item->image_path; ?>" alt="<?php echo htmlspecialchars($item->product_name); ?>" style="width: 50px; height: 50px; object-fit: cover; margin-right: 10px;">
-                                        <?php endif; ?>
+                                        <img src="<?= !empty($item->image_path) ? 'public/images/' . htmlspecialchars($item->image_path) : 'public/images/default.jpg' ?>" 
+                                             alt="<?= htmlspecialchars($item->product_name) ?>" style="width: 50px; height: 50px; object-fit: cover; margin-right: 10px;">
                                         <span><?php echo htmlspecialchars($item->product_name); ?></span>
                                     </div>
                                 </td>
@@ -72,7 +71,7 @@ $cartTotal = $data['cart_total'] ?? 0;
                 </table>
             </div>
             <div class="card-footer d-flex justify-content-between">
-                <a href="index.php?controller=product&action=index" class="btn btn-secondary">Continue Shopping</a>
+                <a href="index.php?controller=home&action=index" class="btn btn-secondary">Continue Shopping</a>
                 <div>
                     <form method="post" action="index.php?controller=cart&action=clear" class="d-inline">
                         <button type="submit" class="btn btn-warning">Clear Cart</button>

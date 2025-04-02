@@ -15,7 +15,7 @@ $controller = isset($_GET['controller']) ? $_GET['controller'] : 'home';
 $action = isset($_GET['action']) ? $_GET['action'] : 'index';
 
 // Nạp header trước khi gọi controller
-require_once 'app/views/partials/header.php';
+
 
 // Điều hướng theo controller
 switch ($controller) {
@@ -34,15 +34,29 @@ switch ($controller) {
             $productController->detail($_GET['id']);
         } elseif ($action === 'create') {
             $productController->create();
-        } elseif ($action === 'addToCart' && isset($_GET['id'])) {
+        }
+        elseif ($action === 'edit' && isset($_GET['id'])) {
+            $productController->edit($_GET['id']);
+        } elseif ($action === 'delete' && isset($_GET['id'])) {
+            $productController->delete($_GET['id']);
+        }
+        elseif ($action === 'addToCart' && isset($_GET['id'])) {
             $productController->addToCart($_GET['id']);
         }
+         elseif ($action === 'search') { // Thêm xử lý tìm kiếm
+                $productController->search();
+            }
         break;
-
     case 'category':
         $categoryController = new CategoryController();
-        if ($action === 'create') {
+        if ($action === 'index') {
+            $categoryController->index();
+        } elseif ($action === 'create') {
             $categoryController->create();
+        } elseif ($action === 'delete' && isset($_GET['id'])) {
+            $categoryController->delete($_GET['id']);
+        } elseif ($action === 'edit' && isset($_GET['id'])) {
+            $categoryController->edit($_GET['id']);
         }
         break;
 
@@ -76,6 +90,7 @@ switch ($controller) {
         }
         break;
 
+
     case 'order':
         $orderController = new OrderController();
         if($action === 'checkout'){
@@ -90,16 +105,25 @@ switch ($controller) {
             $orderController->checkoutWithVNPAY();
         }
         break;
-    case 'admin':
-        $adminController = new AdminController();
-        if ($action === 'dashboard') {
-            $adminController->dashboard();
-        } elseif ($action === 'products') {
-            $adminController->products();
-        } elseif ($action === 'categories') {
-            $adminController->categories();
-        }
-        break;
+    // case 'order':
+ case 'admin':
+    $adminController = new AdminController();
+    if ($action === 'dashboard') {
+        $adminController->dashboard();
+    } elseif ($action === 'products') {
+        $adminController->products();
+    } elseif ($action === 'categories') {
+        $adminController->categories();
+    } elseif ($action === 'users') {
+        $adminController->users();
+    } elseif ($action === 'banUser') { // Route cho banUser
+        $userController = new UserController();
+        $userController->banUser();
+    } elseif ($action === 'unbanUser') { // Route cho unbanUser
+        $userController = new UserController();
+        $userController->unbanUser();
+    }
+    break;
 
 }
 // Nạp footer sau khi gọi controller
