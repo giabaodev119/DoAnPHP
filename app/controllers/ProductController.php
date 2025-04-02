@@ -7,21 +7,21 @@ class ProductController
 {
     // Hiển thị danh sách sản phẩm
     public function index()
-    {   
-         $itemsPerPage = 5; // Số lượng sản phẩm hiển thị trên mỗi trang
-    $currentPage = isset($_GET['page']) ? (int)$_GET['page'] : 1;
-    $offset = ($currentPage - 1) * $itemsPerPage;
+    {
+        $itemsPerPage = 5; // Số lượng sản phẩm hiển thị trên mỗi trang
+        $currentPage = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+        $offset = ($currentPage - 1) * $itemsPerPage;
 
         $categoryModel = new Category();
         $productModel = new Product();
- // Lấy tổng số sản phẩm
-    $totalProducts = $productModel->getTotalProducts();
+        // Lấy tổng số sản phẩm
+        //$totalProducts = $productModel->getTotalProducts();
 
-    // Tính tổng số trang
-    $productTotalPages = ceil($totalProducts / $itemsPerPage);
+        // Tính tổng số trang
+        //$productTotalPages = ceil($totalProducts / $itemsPerPage);
 
-    // Lấy danh sách sản phẩm cho trang hiện tại
-    $products = $productModel->getProductsByPage($itemsPerPage, $offset);
+        // Lấy danh sách sản phẩm cho trang hiện tại
+        $products = $productModel->getProductsByPage($itemsPerPage, $offset);
         // Lấy danh sách danh mục và sản phẩm
         $categories = $categoryModel->getAllCategories();
         $products = $productModel->getAllProducts();
@@ -44,7 +44,7 @@ class ProductController
         if (!empty($keyword) || !empty($categoryId)) {
             $products = $productModel->searchProducts($keyword, $categoryId);
         }
-        
+
         // Truyền dữ liệu sang view
         require_once 'app/views/products/index.php';
     }

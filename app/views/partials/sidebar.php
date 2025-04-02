@@ -63,11 +63,18 @@
                       <a class="nav-link <?= isset($_GET['action']) && $_GET['action'] == 'orders' ? 'active' : '' ?>" href="index.php?controller=admin&action=orders">
                         <i class="fas fa-shopping-bag me-2"></i>
                         Đơn hàng
-                     <li>
-                      <a href="index.php?controller=admin&action=banners">
-                        <span class="sub-item">Banner</span>
                       </a>
                     </li>
+                    <li class="nav-item">
+                      <a class="nav-link <?= isset($_GET['action']) && $_GET['action'] == 'banners' ? 'active' : '' ?>" href="index.php?controller=admin&action=banners">
+                        <i class="fas fa-ad me-2"></i>
+                        Banner
+                      </a>
+                    </li>
+                    <li class="nav-item">
+                      <a class="nav-link text-danger" href="index.php?controller=user&action=logout" onclick="return confirm('Bạn có chắc chắn muốn đăng xuất?')">
+                        <i class="fas fa-sign-out-alt me-2"></i>
+                        Đăng xuất
                       </a>
                     </li>
                   </ul>
