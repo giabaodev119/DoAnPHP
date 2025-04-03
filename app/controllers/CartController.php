@@ -1,8 +1,9 @@
 <?php
 require_once 'app/models/Cart.php';
 require_once 'app/models/Product.php';
+require_once 'app/controllers/BaseController.php';
 
-class CartController
+class CartController extends BaseController
 {
     private $cartModel;
     private $productModel;
@@ -23,6 +24,7 @@ class CartController
      */
     public function index()
     {
+        $this->ensureNotAdmin();
         $data = [];
 
         if ($this->isUserLoggedIn()) {
@@ -44,6 +46,7 @@ class CartController
     //update cart item quantity
     public function update()
     {
+        $this->ensureNotAdmin();
         // Get cart item ID and new quantity
         $cartId = isset($_POST['cart_id']) ? (int)$_POST['cart_id'] : 0;
         $quantity = isset($_POST['quantity']) ? (int)$_POST['quantity'] : 1;
@@ -128,6 +131,7 @@ class CartController
      */
     public function remove()
     {
+        $this->ensureNotAdmin();
         // Get cart item ID
         $cartId = isset($_POST['cart_id']) ? (int)$_POST['cart_id'] : 0;
 
@@ -178,6 +182,7 @@ class CartController
      */
     public function clear()
     {
+        $this->ensureNotAdmin();
         if ($this->isUserLoggedIn()) {
             // Clear database cart for logged-in users
             $userId = $_SESSION['user_id'];

@@ -2,8 +2,9 @@
 require_once 'app/models/Product.php';
 require_once 'app/models/Category.php';
 require_once 'app/models/Cart.php';
+require_once 'app/controllers/BaseController.php';
 
-class ProductController
+class ProductController extends BaseController
 {
     // Hiển thị danh sách sản phẩm
     public function index()
@@ -155,6 +156,9 @@ class ProductController
     // Thêm sản phẩm vào giỏ hàng
     public function addToCart($productId)
     {
+        $this->ensureNotAdmin();
+        $this->ensureUserLoggedIn();
+
         $cartModel = new Cart();
         $productModel = new Product();
 
@@ -245,6 +249,11 @@ class ProductController
     //Hiển thị chi tiết sản phẩm trong trang người dùng
     public function detail($id)
     {
+        if (!isset($_GET['admin']) && isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin') {
+            $_SESSION['error'] = "Tài khoản admin nên xem sản phẩm ở trang quản trị.";
+            header("Location: index.php?controller=admin&action=products");
+            exit();
+        }
         $productModel = new Product();
 
         $product = $productModel->getProductById($id);

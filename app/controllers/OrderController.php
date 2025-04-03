@@ -1,8 +1,9 @@
 <?php
 require_once 'app/models/Order.php';
 require_once 'config/config.php';
+require_once 'app/controllers/BaseController.php';
 
-class OrderController
+class OrderController extends BaseController
 {
     private $orderModel;
 
@@ -22,6 +23,8 @@ class OrderController
      */
     public function checkout()
     {
+        $this->ensureNotAdmin();
+        $this->ensureUserLoggedIn();
         if (!$this->isUserLoggedIn()) {
             $_SESSION['error'] = 'You must be logged in to checkout';
             header('Location: index.php?controller=cart');
@@ -70,6 +73,8 @@ class OrderController
      */
     public function details()
     {
+        $this->ensureNotAdmin();
+        $this->ensureUserLoggedIn();
         if (!$this->isUserLoggedIn()) {
             $_SESSION['error'] = 'You must be logged in to view order details';
             header('Location: index.php?controller=home');
@@ -101,6 +106,8 @@ class OrderController
      */
     public function history()
     {
+        $this->ensureNotAdmin();
+        $this->ensureUserLoggedIn();
         if (!$this->isUserLoggedIn()) {
             $_SESSION['error'] = 'You must be logged in to view order history';
             header('Location: index.php?controller=home');
@@ -124,6 +131,8 @@ class OrderController
     }
     public function checkoutWithVNPAY()
     {
+        $this->ensureNotAdmin();
+        $this->ensureUserLoggedIn();
         require_once __DIR__ . '/../config/vnpayconfig.php';
 
         error_reporting(E_ALL & ~E_NOTICE & ~E_DEPRECATED);
@@ -173,6 +182,8 @@ class OrderController
      */
     public function confirmReceipt()
     {
+        $this->ensureNotAdmin();
+        $this->ensureUserLoggedIn();
         if (!$this->isUserLoggedIn()) {
             $_SESSION['error'] = 'Bạn phải đăng nhập để xác nhận đơn hàng';
             header('Location: index.php?controller=user&action=login');
