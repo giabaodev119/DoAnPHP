@@ -355,25 +355,32 @@
                                 <h3 class="order-detail-title">
                                     <i class="fas fa-edit"></i> Cập nhật trạng thái
                                 </h3>
-                                <form action="index.php?controller=admin&action=updateOrderStatus" method="post">
-                                    <input type="hidden" name="order_id" value="<?= $order['id'] ?>">
 
-                                    <div class="mb-3">
-                                        <label for="status" class="form-label">Trạng thái đơn hàng</label>
-                                        <select class="form-select" name="status" id="status">
-                                            <option value="pending" <?= $order['status'] === 'pending' ? 'selected' : '' ?>>Chờ xử lý</option>
-                                            <option value="processing" <?= $order['status'] === 'processing' ? 'selected' : '' ?>>Đang xử lý</option>
-                                            <option value="ready_to_ship" <?= $order['status'] === 'ready_to_ship' ? 'selected' : '' ?>>Sẵn sàng giao</option>
-                                            <option value="shipping" <?= $order['status'] === 'shipping' ? 'selected' : '' ?>>Đang giao hàng</option>
-                                            <option value="completed" <?= $order['status'] === 'completed' ? 'selected' : '' ?>>Hoàn thành</option>
-                                            <option value="cancelled" <?= $order['status'] === 'cancelled' ? 'selected' : '' ?>>Đã hủy</option>
-                                        </select>
+                                <?php if ($order['status'] === 'completed'): ?>
+                                    <div class="alert alert-info">
+                                        <i class="fas fa-info-circle me-2"></i>Đơn hàng này đã hoàn thành và không thể thay đổi trạng thái.
                                     </div>
+                                <?php else: ?>
+                                    <form action="index.php?controller=admin&action=updateOrderStatus" method="post">
+                                        <input type="hidden" name="order_id" value="<?= $order['id'] ?>">
 
-                                    <button type="submit" class="btn btn-primary w-100">
-                                        <i class="fas fa-save me-2"></i>Cập nhật trạng thái
-                                    </button>
-                                </form>
+                                        <div class="mb-3">
+                                            <label for="status" class="form-label">Trạng thái đơn hàng</label>
+                                            <select class="form-select" name="status" id="status">
+                                                <option value="pending" <?= $order['status'] === 'pending' ? 'selected' : '' ?>>Chờ xử lý</option>
+                                                <option value="processing" <?= $order['status'] === 'processing' ? 'selected' : '' ?>>Đang xử lý</option>
+                                                <option value="ready_to_ship" <?= $order['status'] === 'ready_to_ship' ? 'selected' : '' ?>>Sẵn sàng giao</option>
+                                                <option value="shipping" <?= $order['status'] === 'shipping' ? 'selected' : '' ?>>Đang giao hàng</option>
+                                                <option value="completed" <?= $order['status'] === 'completed' ? 'selected' : '' ?>>Hoàn thành</option>
+                                                <option value="cancelled" <?= $order['status'] === 'cancelled' ? 'selected' : '' ?>>Đã hủy</option>
+                                            </select>
+                                        </div>
+
+                                        <button type="submit" class="btn btn-primary w-100">
+                                            <i class="fas fa-save me-2"></i>Cập nhật trạng thái
+                                        </button>
+                                    </form>
+                                <?php endif; ?>
                             </div>
                         </div>
 

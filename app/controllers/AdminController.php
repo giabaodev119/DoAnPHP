@@ -107,6 +107,17 @@ class AdminController
             exit;
         }
 
+        // Kiểm tra trạng thái hiện tại
+        $orderModel = new Order();
+        $order = $orderModel->getOrderDetails($orderId);
+
+        // Ngăn cập nhật nếu đơn hàng đã hoàn thành
+        if ($order && $order['status'] === 'completed') {
+            $_SESSION['error'] = 'Không thể cập nhật đơn hàng đã hoàn thành';
+            header('Location: index.php?controller=admin&action=orderDetail&id=' . $orderId);
+            exit;
+        }
+
         // Các trạng thái hợp lệ
         $validStatuses = ['pending', 'processing', 'ready_to_ship', 'shipping', 'completed', 'cancelled'];
         if (!in_array($status, $validStatuses)) {
@@ -115,7 +126,6 @@ class AdminController
             exit;
         }
 
-        $orderModel = new Order();
         $result = $orderModel->updateOrderStatus($orderId, $status);
 
         if ($result) {
