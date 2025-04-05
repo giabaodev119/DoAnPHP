@@ -11,5 +11,4 @@ $expire = date('YmdHis', strtotime('+15 minutes', strtotime($startTime)));
 //Config input format
 //Expire
 $startTime = date("YmdHis");
-$expire = date('YmdHis',strtotime('+15 minutes',strtotime($startTime)));
-?>
+$expire = date('YmdHis', strtotime('+15 minutes', strtotime($startTime)));

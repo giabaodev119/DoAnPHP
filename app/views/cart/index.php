@@ -185,6 +185,34 @@ $cartTotal = $data['cart_total'] ?? 0;
             border-color: #bd2130;
         }
 
+        .voucher-container {
+            margin-top: 20px;
+        }
+
+        .voucher-form {
+            margin-top: 10px;
+        }
+
+        .cart-summary {
+            margin-top: 20px;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .subtotal span,
+        .total span {
+            font-weight: 600;
+        }
+
+        .discount span {
+            font-weight: 600;
+            color: #dc3545;
+        }
+
         @media (max-width: 768px) {
             .cart-body {
                 padding: 15px;
@@ -194,6 +222,35 @@ $cartTotal = $data['cart_total'] ?? 0;
                 width: 60px;
                 height: 60px;
             }
+        }
+
+        .voucher-container {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .voucher-form {
+            margin-top: 10px;
+        }
+
+        #voucherMessage {
+            margin-top: 8px;
+            font-size: 14px;
+        }
+
+        .voucher-success {
+            color: #28a745;
+        }
+
+        .voucher-error {
+            color: #dc3545;
+        }
+
+        .summary-row.discount {
+            color: #28a745;
+            font-weight: 500;
         }
     </style>
 </head>
@@ -372,6 +429,50 @@ $cartTotal = $data['cart_total'] ?? 0;
                                     </tfoot>
                                 </table>
                             </div>
+
+                            <!-- Thêm form nhập voucher -->
+                            <div class="voucher-container">
+                                <h4><i class="fas fa-tags me-2"></i>Mã giảm giá</h4>
+                                <div class="voucher-form">
+                                    <div class="input-group">
+                                        <input type="text" id="voucherCode" class="form-control" placeholder="Nhập mã giảm giá..."
+                                            value="<?= isset($_SESSION['voucher']) ? $_SESSION['voucher']['code'] : '' ?>"
+                                            <?= isset($_SESSION['voucher']) ? 'disabled' : '' ?>>
+                                        <?php if (!isset($_SESSION['voucher'])): ?>
+                                            <button type="button" id="applyVoucher" class="btn btn-primary">Áp dụng</button>
+                                        <?php else: ?>
+                                            <button type="button" id="removeVoucher" class="btn btn-danger">Hủy</button>
+                                        <?php endif; ?>
+                                    </div>
+                                    <div id="voucherMessage"></div>
+                                </div>
+                            </div>
+
+                            <!-- Tổng tiền giỏ hàng -->
+                            <div class="cart-summary">
+                                <div class="summary-row subtotal">
+                                    <span>Tạm tính:</span>
+                                    <span id="subtotal"><?= number_format($cartTotal, 0, ',', '.') ?> đ</span>
+                                </div>
+
+                                <!-- Hiển thị giảm giá từ voucher nếu có -->
+                                <?php
+                                $discount = 0;
+                                if (isset($_SESSION['voucher'])) {
+                                    $discount = $_SESSION['voucher']['discount_amount'];
+                                }
+                                ?>
+
+                                <div id="discountRow" class="summary-row discount <?= $discount > 0 ? '' : 'd-none' ?>">
+                                    <span>Giảm giá:</span>
+                                    <span id="discount" class="text-danger">-<?= number_format($discount, 0, ',', '.') ?> đ</span>
+                                </div>
+
+                                <div class="summary-row total">
+                                    <span>Thành tiền:</span>
+                                    <span id="total"><?= number_format($cartTotal - $discount, 0, ',', '.') ?> đ</span>
+                                </div>
+                            </div>
                         <?php endif; ?>
                     </div>
 
@@ -400,6 +501,121 @@ $cartTotal = $data['cart_total'] ?? 0;
     <?php include 'app/views/partials/footer.php'; ?>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Xử lý áp dụng voucher
+            const applyVoucherBtn = document.getElementById('applyVoucher');
+            if (applyVoucherBtn) {
+                applyVoucherBtn.addEventListener('click', function() {
+                    const voucherCode = document.getElementById('voucherCode').value.trim();
+                    if (!voucherCode) {
+                        showVoucherMessage('Vui lòng nhập mã giảm giá', 'error');
+                        return;
+                    }
+
+                    applyVoucher(voucherCode);
+                });
+            }
+
+            // Xử lý xóa voucher
+            const removeVoucherBtn = document.getElementById('removeVoucher');
+            if (removeVoucherBtn) {
+                removeVoucherBtn.addEventListener('click', function() {
+                    removeVoucher();
+                });
+            }
+
+            // Hàm áp dụng voucher
+            function applyVoucher(code) {
+                // Hiện loading
+                showVoucherMessage('Đang kiểm tra mã...', '');
+
+                const formData = new FormData();
+                formData.append('voucher_code', code);
+
+                fetch('index.php?controller=voucher&action=apply', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Cập nhật UI khi áp dụng thành công
+                            document.getElementById('voucherCode').disabled = true;
+                            document.getElementById('applyVoucher').innerHTML = 'Hủy';
+                            document.getElementById('applyVoucher').id = 'removeVoucher';
+                            document.getElementById('removeVoucher').classList.replace('btn-primary', 'btn-danger');
+                            document.getElementById('removeVoucher').addEventListener('click', removeVoucher);
+
+                            // Hiển thị thông tin giảm giá
+                            document.getElementById('discount').innerHTML = '-' + data.discount_formatted;
+                            document.getElementById('discountRow').classList.remove('d-none');
+                            document.getElementById('total').innerHTML = data.new_total_formatted;
+
+                            showVoucherMessage(data.message, 'success');
+                        } else {
+                            showVoucherMessage(data.message, 'error');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        showVoucherMessage('Có lỗi xảy ra, vui lòng thử lại sau', 'error');
+                    });
+            }
+
+            // Hàm xóa voucher
+            function removeVoucher() {
+                // Hiện loading
+                showVoucherMessage('Đang xóa mã...', '');
+
+                fetch('index.php?controller=voucher&action=remove', {
+                        method: 'POST'
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Cập nhật UI khi xóa thành công
+                            document.getElementById('voucherCode').disabled = false;
+                            document.getElementById('voucherCode').value = '';
+                            document.getElementById('removeVoucher').innerHTML = 'Áp dụng';
+                            document.getElementById('removeVoucher').id = 'applyVoucher';
+                            document.getElementById('applyVoucher').classList.replace('btn-danger', 'btn-primary');
+                            document.getElementById('applyVoucher').addEventListener('click', function() {
+                                const code = document.getElementById('voucherCode').value.trim();
+                                if (code) applyVoucher(code);
+                            });
+
+                            // Ẩn thông tin giảm giá
+                            document.getElementById('discountRow').classList.add('d-none');
+                            document.getElementById('total').innerHTML = document.getElementById('subtotal').innerHTML;
+
+                            showVoucherMessage('', '');
+                        } else {
+                            showVoucherMessage(data.message, 'error');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        showVoucherMessage('Có lỗi xảy ra, vui lòng thử lại sau', 'error');
+                    });
+            }
+
+            // Hiển thị thông báo
+            function showVoucherMessage(message, type) {
+                const messageEl = document.getElementById('voucherMessage');
+                messageEl.textContent = message;
+
+                // Xóa các class hiện tại
+                messageEl.classList.remove('voucher-success', 'voucher-error');
+
+                if (type === 'success') {
+                    messageEl.classList.add('voucher-success');
+                } else if (type === 'error') {
+                    messageEl.classList.add('voucher-error');
+                }
+            }
+        });
+    </script>
 </body>
 
 </html>

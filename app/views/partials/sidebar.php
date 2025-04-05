@@ -66,6 +66,12 @@
                       </a>
                     </li>
                     <li class="nav-item">
+                      <a class="nav-link <?= isset($_GET['action']) && $_GET['action'] == 'vouchers' ? 'active' : '' ?>" href="index.php?controller=admin&action=vouchers">
+                        <i class="fas fa-ad me-2"></i>
+                        Khuyến mãi
+                      </a>
+                    </li>
+                    <li class="nav-item">
                       <a class="nav-link <?= isset($_GET['action']) && $_GET['action'] == 'banners' ? 'active' : '' ?>" href="index.php?controller=admin&action=banners">
                         <i class="fas fa-ad me-2"></i>
                         Banner

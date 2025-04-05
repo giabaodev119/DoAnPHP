@@ -9,6 +9,7 @@ require_once 'app/controllers/UserController.php';
 require_once 'app/controllers/CartController.php';
 require_once 'app/controllers/OrderController.php';
 require_once 'app/controllers/SideBannerController.php';
+require_once 'app/controllers/VoucherController.php';
 // Có thể bổ sung thêm nếu cần: UserController, OrderController, ...
 
 // Lấy controller và action từ URL, mặc định là trang chủ
@@ -121,32 +122,50 @@ switch ($controller) {
         } elseif ($action === 'unbanUser') { // Route cho unbanUser
             $userController = new UserController();
             $userController->unbanUser();
-        }
-     elseif($action === 'banners') {
-        $bannerController = new SideBannerController();
-        $bannerController->index();
-    } elseif ($action === 'createBanner') {
-        $bannerController = new SideBannerController();
-        $bannerController->create();
-    } elseif ($action === 'deleteBanner' && isset($_GET['id'])) {
-        $bannerController = new SideBannerController();
-        $bannerController->delete($_GET['id']);
-    } elseif ($action === 'toggleBannerStatus' && isset($_GET['id'])) {
-        $bannerController = new SideBannerController();
-        $bannerController->toggleStatus($_GET['id']);
-    }
-    elseif ($action === 'editBanner' && isset($_GET['id'])) {
-    $bannerController = new SideBannerController();
-    $bannerController->edit($_GET['id']);
-}
-    elseif ($action === 'orders') {
+        } elseif ($action === 'banners') {
+            $bannerController = new SideBannerController();
+            $bannerController->index();
+        } elseif ($action === 'createBanner') {
+            $bannerController = new SideBannerController();
+            $bannerController->create();
+        } elseif ($action === 'deleteBanner' && isset($_GET['id'])) {
+            $bannerController = new SideBannerController();
+            $bannerController->delete($_GET['id']);
+        } elseif ($action === 'toggleBannerStatus' && isset($_GET['id'])) {
+            $bannerController = new SideBannerController();
+            $bannerController->toggleStatus($_GET['id']);
+        } elseif ($action === 'editBanner' && isset($_GET['id'])) {
+            $bannerController = new SideBannerController();
+            $bannerController->edit($_GET['id']);
+        } elseif ($action === 'orders') {
             $adminController->orders();
         } elseif ($action === 'orderDetail' && isset($_GET['id'])) {
             $adminController->orderDetail($_GET['id']);
         } elseif ($action === 'updateOrderStatus') {
             $adminController->updateOrderStatus();
+        } elseif ($action === 'vouchers') {
+            $voucherController = new VoucherController();
+            $voucherController->index();
+        } elseif ($action === 'createVoucher') {
+            $voucherController = new VoucherController();
+            $voucherController->create();
+        } elseif ($action === 'editVoucher' && isset($_GET['id'])) {
+            $voucherController = new VoucherController();
+            $voucherController->edit();
+        } elseif ($action === 'deleteVoucher' && isset($_GET['id'])) {
+            $voucherController = new VoucherController();
+            $voucherController->delete();
         }
 
 
+        break;
+
+    case 'voucher':
+        $voucherController = new VoucherController();
+        if ($action === 'apply') {
+            $voucherController->apply();
+        } elseif ($action === 'remove') {
+            $voucherController->remove();
+        }
         break;
 }

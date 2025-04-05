@@ -42,7 +42,7 @@
                 $stmt->execute([
                     ':user_id' => $userId,
                     ':total_price' => $totalPrice,
-                    ':status' => 'pendings'
+                    ':status' => 'pending'
                 ]);
 
                 $orderId = $conn->lastInsertId(); // Lấy ID đơn hàng mới tạo
@@ -66,6 +66,27 @@
                         ':product_id' => $item->product_id,
                         ':quantity' => $item->quantity
                     ]);
+                }
+
+                // Thêm đoạn này sau khi tạo đơn hàng và lấy orderId
+                // Xử lý voucher nếu có
+                if (isset($order['voucher_id']) && isset($order['discount_amount'])) {
+                    $voucherId = $order['voucher_id'];
+                    $discountAmount = $order['discount_amount'];
+
+                    // Ghi nhận việc sử dụng voucher
+                    $stmt = $conn->prepare("INSERT INTO voucher_usage (voucher_id, user_id, order_id, discount_amount) 
+                                            VALUES (:voucher_id, :user_id, :order_id, :discount_amount)");
+                    $stmt->execute([
+                        ':voucher_id' => $voucherId,
+                        ':user_id' => $userId,
+                        ':order_id' => $orderId,
+                        ':discount_amount' => $discountAmount
+                    ]);
+
+                    // Tăng số lượng đã sử dụng của voucher
+                    $stmt = $conn->prepare("UPDATE vouchers SET used_count = used_count + 1 WHERE id = :voucher_id");
+                    $stmt->execute([':voucher_id' => $voucherId]);
                 }
 
                 // Xóa giỏ hàng sau khi đơn hàng được lưu
@@ -126,6 +147,12 @@
                     <th>Thời gian thanh toán</th>
                     <td><?php echo htmlspecialchars($_GET['vnp_PayDate']); ?></td>
                 </tr>
+                <?php if (isset($order['voucher_code']) && isset($order['discount_amount'])): ?>
+                    <tr>
+                        <th>Mã giảm giá</th>
+                        <td><?php echo htmlspecialchars($order['voucher_code']); ?> (-<?php echo number_format($order['discount_amount'], 0, ',', '.'); ?> VND)</td>
+                    </tr>
+                <?php endif; ?>
             </table>
 
             <h4>Chi tiết sản phẩm</h4>

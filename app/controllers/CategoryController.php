@@ -1,8 +1,10 @@
 <?php
 require_once 'app/models/Category.php';
 
-class CategoryController {
-    public function index() {
+class CategoryController
+{
+    public function index()
+    {
         // Lấy danh sách danh mục
         $categoryModel = new Category();
         $categories = $categoryModel->getAll();
@@ -11,7 +13,8 @@ class CategoryController {
         require_once 'app/views/admin/categories/index.php';
     }
 
-    public function create() {
+    public function create()
+    {
         $error = null;
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -34,7 +37,8 @@ class CategoryController {
         require_once 'app/views/admin/categories/create.php';
     }
 
-    public function delete($id) {
+    public function delete($id)
+    {
         $categoryModel = new Category();
 
         if ($categoryModel->delete($id)) {
@@ -46,7 +50,8 @@ class CategoryController {
         }
     }
 
-    public function edit($id) {
+    public function edit($id)
+    {
         $categoryModel = new Category();
         $category = $categoryModel->getById($id);
         $error = null;
@@ -70,4 +75,3 @@ class CategoryController {
         require_once 'app/views/admin/categories/edit.php';
     }
 }
-?>
