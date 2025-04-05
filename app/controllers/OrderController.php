@@ -34,11 +34,13 @@ class OrderController
 
             if ($orderId) {
                 $_SESSION['order_id'] = $orderId;
-                $_SESSION['message'] = 'Order placed successfully!';
-                header("Location: index.php");
-
+                $_SESSION['message'] = 'Đơn hàng đã được đặt thành công!';
+                header("Location: index.php?controller=order&action=details&id=" . $orderId);
             } else {
-                $_SESSION['error'] = 'Checkout failed. Please try again.';
+                // Nếu không có thông báo lỗi cụ thể từ model
+                if (!isset($_SESSION['error'])) {
+                    $_SESSION['error'] = 'Đặt hàng thất bại. Vui lòng thử lại.';
+                }
                 header('Location: index.php?controller=cart');
             }
             exit;
@@ -110,7 +112,7 @@ class OrderController
         $data['orders'] = $this->orderModel->getOrderHistory($userId);
         $data['title'] = 'Order History';
 
-        require_once 'app/views/order/history.php';
+        require_once 'app/views/orders/history.php';
     }
 
     /**
@@ -120,9 +122,10 @@ class OrderController
     {
         return isset($_SESSION['user_id']);
     }
-    public function checkoutWithVNPAY() {
+    public function checkoutWithVNPAY()
+    {
         require_once __DIR__ . '/../config/vnpayconfig.php';
-        
+
         error_reporting(E_ALL & ~E_NOTICE & ~E_DEPRECATED);
         date_default_timezone_set('Asia/Ho_Chi_Minh');
 
@@ -131,7 +134,7 @@ class OrderController
         $vnp_Locale = $_POST['language'] ?? 'vn';
         $vnp_BankCode = $_POST['bankCode'] ?? '';
         $vnp_IpAddr = $_SERVER['REMOTE_ADDR'];
-        
+
         $inputData = array(
             "vnp_Version" => "2.1.0",
             "vnp_TmnCode" => $vnp_TmnCode,
@@ -147,25 +150,52 @@ class OrderController
             "vnp_TxnRef" => $vnp_TxnRef,
             "vnp_ExpireDate" => $expire
         );
-        
+
         if (!empty($vnp_BankCode)) {
             $inputData['vnp_BankCode'] = $vnp_BankCode;
         }
-        
+
         ksort($inputData);
         $query = http_build_query($inputData);
-        
+
         if (isset($vnp_HashSecret)) {
             $hashdata = urldecode(http_build_query($inputData));
             $vnpSecureHash = hash_hmac('sha512', $hashdata, $vnp_HashSecret);
             $query .= '&vnp_SecureHash=' . $vnpSecureHash;
         }
-        
-        
+
+
         echo $vnp_Url . '?' . $query;
         exit();
-        
-    } 
+    }
+    /**
+     * Xác nhận đã nhận hàng
+     */
+    public function confirmReceipt()
+    {
+        if (!$this->isUserLoggedIn()) {
+            $_SESSION['error'] = 'Bạn phải đăng nhập để xác nhận đơn hàng';
+            header('Location: index.php?controller=user&action=login');
+            exit;
+        }
 
+        $orderId = isset($_POST['order_id']) ? (int) $_POST['order_id'] : 0;
+        if (!$orderId) {
+            $_SESSION['error'] = 'Mã đơn hàng không hợp lệ';
+            header('Location: index.php?controller=order&action=history');
+            exit;
+        }
+
+        $userId = $_SESSION['user_id'];
+        $result = $this->orderModel->confirmOrderReceived($orderId, $userId);
+
+        if ($result) {
+            $_SESSION['message'] = 'Cảm ơn bạn đã xác nhận! Đơn hàng đã được đánh dấu là hoàn thành.';
+        } else {
+            $_SESSION['error'] = 'Không thể xác nhận đơn hàng. Vui lòng thử lại hoặc liên hệ hỗ trợ.';
+        }
+
+        header('Location: index.php?controller=order&action=history');
+        exit;
+    }
 }
-?>

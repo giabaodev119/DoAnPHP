@@ -6,9 +6,9 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>VNPAY RESPONSE</title>
-    <link href="/vnpay_php/assets/bootstrap.min.css" rel="stylesheet" />
-    <link href="/vnpay_php/assets/jumbotron-narrow.css" rel="stylesheet">
-    <script src="/vnpay_php/assets/jquery-1.11.3.min.js"></script>
+    <link href="../../../public/assets/bootstrap.min.css" rel="stylesheet" />
+    <link href="../../../public/assets/jumbotron-narrow.css" rel="stylesheet">
+    <script src="../../../public/assets/jquery-1.11.3.min.js"></script>
 </head>
 
 <body>
@@ -38,14 +38,15 @@
                 $conn->beginTransaction();
 
                 // Lưu vào bảng orders
-                $stmt = $conn->prepare("INSERT INTO orders (user_id, total_price, status) VALUES (:user_id, :total_price, 'pending')");
+                $stmt = $conn->prepare("INSERT INTO orders (user_id, total_price, status) VALUES (:user_id, :total_price, :status)");
                 $stmt->execute([
                     ':user_id' => $userId,
-                    ':total_price' => $totalPrice
+                    ':total_price' => $totalPrice,
+                    ':status' => 'pendings'
                 ]);
 
                 $orderId = $conn->lastInsertId(); // Lấy ID đơn hàng mới tạo
-    
+
                 // Lưu vào bảng order_items
                 $stmt = $conn->prepare("INSERT INTO order_items (order_id, product_id, quantity, price) 
                                         VALUES (:order_id, :product_id, :quantity, :price)");
@@ -55,6 +56,15 @@
                         ':product_id' => $item->product_id,
                         ':quantity' => $item->quantity,
                         ':price' => $item->price
+                    ]);
+
+                    // Cập nhật số lượng tồn kho
+                    $updateStockStmt = $conn->prepare("UPDATE products 
+                                                     SET stock = stock - :quantity
+                                                     WHERE id = :product_id AND stock >= :quantity");
+                    $updateStockStmt->execute([
+                        ':product_id' => $item->product_id,
+                        ':quantity' => $item->quantity
                     ]);
                 }
 
@@ -71,6 +81,7 @@
                 $orderSuccess = true;
                 $message = "Thanh toán thành công! Đơn hàng của bạn đã được ghi nhận.";
             } catch (PDOException $e) {
+                $conn->rollBack();
                 echo "Error inserting order: " . $e->getMessage();
             }
         } else {
@@ -139,7 +150,7 @@
                 </tbody>
             </table>
         <?php endif; ?>
-        <a href="../../index.php">Về trang chủ</a>
+        <a href="http://localhost/DoAnPHP/index.php">Về trang chủ</a>
 
     </div>
 
