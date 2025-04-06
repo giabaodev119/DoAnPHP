@@ -71,5 +71,53 @@ public function getUserById($id) {
             return [];
         }
     }
+    public function updateProfile($userId, $data) {
+        try {
+            $allowedFields = ['name', 'phone'];
+            $updates = [];
+            $params = [];
+    
+            foreach ($allowedFields as $field) {
+                if (isset($data[$field]) && !empty($data[$field])) {
+                    $updates[] = "$field = ?";
+                    $params[] = trim($data[$field]);
+                }
+            }
+    
+            if (empty($updates)) {
+                return false;
+            }
+    
+            $params[] = $userId;
+            $sql = "UPDATE users SET " . implode(', ', $updates) . " WHERE id = ?";
+            
+            $stmt = $this->conn->prepare($sql);
+            return $stmt->execute($params);
+        } catch (PDOException $e) {
+            error_log("[" . date('Y-m-d H:i:s') . "] Database error in updateProfile(): " . $e->getMessage());
+            return false;
+        }
+    }
+    
+    public function validateProfileUpdate($data) {
+        $errors = [];
+    
+        // Validate name
+        if (empty($data['name'])) {
+            $errors['name'] = "Họ và tên không được để trống";
+        } elseif (strlen($data['name']) > 100) {
+            $errors['name'] = "Họ và tên không được vượt quá 100 ký tự";
+        }
+    
+        // Validate phone (if provided)
+        if (!empty($data['phone'])) {
+            if (!preg_match('/^[0-9]{10,11}$/', $data['phone'])) {
+                $errors['phone'] = "Số điện thoại không hợp lệ";
+            }
+        }
+    
+        return $errors;
+    }
+    
 }
 ?>

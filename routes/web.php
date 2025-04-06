@@ -84,7 +84,13 @@ switch ($controller) {
             $userController->register();
         } elseif ($action === 'logout') {
             $userController->logout();
-        }
+        } elseif ($action === 'profile') {
+            $userController->profile();
+        } elseif ($action === 'editProfile') {
+            $userController->editProfile();
+        } elseif ($action === 'updateProfile') {
+            $userController->updateProfile();
+        }  
         break;
 
 
