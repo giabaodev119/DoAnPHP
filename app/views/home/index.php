@@ -6,16 +6,112 @@
     <title>Trang chủ - Shop Công nghệ</title>
     <link rel="stylesheet" href="public/css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+    <style>
+    .banner-track {
+        display: flex;
+        transition: transform 0.5s ease-in-out;
+        width: 100%;
+    }
+</style>
 </head>
 
 <body>
 <?php
     require_once 'app/views/partials/header.php';
+    require_once 'app/models/Banner.php';
+$bannerModel = new Banner();
+$activeBanners = $bannerModel->getActiveBanners();
 ?>
 
-    <section class="banner">
-        Chào mừng đến với cửa hàng công nghệ!
-    </section>
+<section class="banner" style="height: auto;">
+    <?php if (!empty($activeBanners)): ?>
+        <div class="banner-slider" style="
+    position: relative;
+    width: 1000px;
+    max-width: 100%;
+    margin: 10px auto 30px;
+    overflow: hidden;
+    height: 600px;
+    border-radius: 8px;
+">
+    <div class="banner-track" style="
+        display: flex;
+        width: <?= count($activeBanners) * 34 ?>%;">
+        <?php foreach ($activeBanners as $banner): ?>
+            <div class="banner-slide" style="
+                flex: 0 0 100%;
+                position: relative;
+            ">
+                <img src="public/images/banners/<?php echo $banner['image_path']; ?>" 
+                    alt="<?php echo htmlspecialchars($banner['title']); ?>" 
+                    style="width: 100%; height: 600px; object-fit: cover; filter: brightness(60%);">
+
+                <div class="banner-title"
+                    style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+                        color: white; font-size: 24px; font-weight: bold; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">
+                    <?= htmlspecialchars($banner['title']) ?>
+                </div>
+            </div>
+        <?php endforeach; ?>
+    </div>
+
+    <!-- Pagination -->
+    <div class="banner-pagination" style="
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        text-align: center;
+        z-index: 10;
+    ">
+        <?php foreach ($activeBanners as $i => $_): ?>
+            <span class="dot" style="
+                height: 12px;
+                width: 12px;
+                margin: 0 5px;
+                background-color: <?= $i === 0 ? '#fff' : 'rgba(255, 255, 255, 0.5)' ?>;
+                border-radius: 50%;
+                display: inline-block;
+                cursor: pointer;
+                transition: background-color 0.3s;
+            " data-index="<?= $i ?>"></span>
+        <?php endforeach; ?>
+    </div>
+</div>
+
+        
+<script>
+    const track = document.querySelector('.banner-track');
+    const dots = document.querySelectorAll('.dot');
+    const totalSlides = dots.length;
+    let currentIndex = 0;
+
+    function showSlide(index) {
+        track.style.transform = `translateX(-${index * 100}%)`;
+        dots.forEach((dot, i) => {
+            dot.style.backgroundColor = i === index ? '#fff' : 'rgba(255, 255, 255, 0.5)';
+        });
+        currentIndex = index;
+    }
+
+    setInterval(() => {
+        const nextIndex = (currentIndex + 1) % totalSlides;
+        showSlide(nextIndex);
+    }, 3000);
+
+    dots.forEach(dot => {
+        dot.addEventListener('click', () => {
+            const index = parseInt(dot.getAttribute('data-index'));
+            showSlide(index);
+        });
+    });
+</script>
+    <?php else: ?>
+        <p style="text-align: center;">Chào mừng đến với cửa hàng công nghệ!</p>
+    <?php endif; ?>
+</section>
+
+
 
     <!-- Form tìm kiếm -->
     <form action="index.php" method="GET" style="text-align: center; margin-bottom: 20px;">
