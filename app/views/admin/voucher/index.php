@@ -74,7 +74,9 @@
 
 <body>
     <div class="wrapper">
-        <?php require_once 'app/views/partials/sidebar.php'; ?>
+        <?php
+        require_once 'app/views/partials/sidebar.php';
+        ?>
         <!-- Main Content -->
         <div class="main-panel">
             <div class="content">

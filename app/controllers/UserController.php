@@ -206,42 +206,43 @@ class UserController
         exit();
     }
     public function profile()
-{
-    if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
-        header("Location: index.php?controller=user&action=login");
-        exit();
-    }
-
-    $userModel = new User();
-    $user = $userModel->getUserById($_SESSION['user_id']);
-
-    require_once 'app/views/users/profile.php';
-}
-public function updateProfile() {
-    if (!isset($_SESSION['user_id'])) {
-        header("Location: index.php?controller=user&action=login");
-        exit();
-    }
-
-    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        $userModel = new User();
-        $userId = $_SESSION['user_id'];
-
-        // Validate input
-        $errors = $userModel->validateProfileUpdate($_POST);
-
-        if (empty($errors)) {
-            if ($userModel->updateProfile($userId, $_POST)) {
-                $_SESSION['message'] = "Cập nhật thông tin thành công!";
-            } else {
-                $_SESSION['error'] = "Có lỗi xảy ra khi cập nhật thông tin!";
-            }
-        } else {
-            $_SESSION['errors'] = $errors;
+    {
+        if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
+            header("Location: index.php?controller=user&action=login");
+            exit();
         }
-    }
 
-    header("Location: index.php?controller=user&action=profile");
-    exit();
-}
+        $userModel = new User();
+        $user = $userModel->getUserById($_SESSION['user_id']);
+
+        require_once 'app/views/users/profile.php';
+    }
+    public function updateProfile()
+    {
+        if (!isset($_SESSION['user_id'])) {
+            header("Location: index.php?controller=user&action=login");
+            exit();
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $userModel = new User();
+            $userId = $_SESSION['user_id'];
+
+            // Validate input
+            $errors = $userModel->validateProfileUpdate($_POST);
+
+            if (empty($errors)) {
+                if ($userModel->updateProfile($userId, $_POST)) {
+                    $_SESSION['message'] = "Cập nhật thông tin thành công!";
+                } else {
+                    $_SESSION['error'] = "Có lỗi xảy ra khi cập nhật thông tin!";
+                }
+            } else {
+                $_SESSION['errors'] = $errors;
+            }
+        }
+
+        header("Location: index.php?controller=user&action=profile");
+        exit();
+    }
 }
