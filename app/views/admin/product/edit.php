@@ -63,7 +63,7 @@
                         <div class="alert alert-danger"><?= htmlspecialchars($error) ?></div>
                     <?php endif; ?>
                     
-                    <form method="post" enctype="multipart/form-data">
+                    <form method="post" enctype="multipart/form-data" id="productForm">
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="mb-3">
@@ -76,11 +76,52 @@
                                     <input type="number" class="form-control" id="price" name="price" 
                                            value="<?= $product['price'] ?? 0 ?>" required>
                                 </div>
-                                <div class="mb-3">
-                                    <label for="stock" class="form-label">Số lượng tồn kho</label>
-                                    <input type="number" class="form-control" id="stock" name="stock" 
-                                           value="<?= $product['stock'] ?? 0 ?>" required>
-                                </div>
+                               <!-- Thay thế phần nhập số lượng tồn kho đơn lẻ bằng phần size và số lượng -->
+<div class="mb-3">
+    <label class="form-label">Sizes và Số lượng <span class="text-danger">*</span></label>
+    <div id="sizesContainer">
+        <?php 
+        $sizes = $productModel->getProductSizes($product['id']);
+        if (!empty($sizes)): 
+            foreach ($sizes as $size): ?>
+                <div class="size-row d-flex gap-2 mb-2">
+                    <select class="form-select" name="sizes[]" style="width: 100px;" required>
+                        <option value="">Size</option>
+                        <option value="S" <?= $size['size'] == 'S' ? 'selected' : '' ?>>S</option>
+                        <option value="M" <?= $size['size'] == 'M' ? 'selected' : '' ?>>M</option>
+                        <option value="L" <?= $size['size'] == 'L' ? 'selected' : '' ?>>L</option>
+                        <option value="XL" <?= $size['size'] == 'XL' ? 'selected' : '' ?>>XL</option>
+                        <option value="XXL" <?= $size['size'] == 'XXL' ? 'selected' : '' ?>>XXL</option>
+                    </select>
+                    <input type="number" class="form-control" name="stock[]" 
+                           placeholder="Số lượng tồn" min="1" value="<?= $size['stock'] ?>" required>
+                    <button type="button" class="btn btn-danger btn-sm" onclick="removeSize(this)">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            <?php endforeach;
+        else: ?>
+            <div class="size-row d-flex gap-2 mb-2">
+                <select class="form-select" name="sizes[]" style="width: 100px;" required>
+                    <option value="">Size</option>
+                    <option value="S">S</option>
+                    <option value="M">M</option>
+                    <option value="L">L</option>
+                    <option value="XL">XL</option>
+                    <option value="XXL">XXL</option>
+                </select>
+                <input type="number" class="form-control" name="stock[]" 
+                       placeholder="Số lượng tồn" min="1" required>
+                <button type="button" class="btn btn-danger btn-sm" onclick="removeSize(this)">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        <?php endif; ?>
+    </div>
+    <button type="button" class="btn btn-sm btn-secondary mt-2" onclick="addSize()">
+        <i class="fas fa-plus"></i> Thêm size
+    </button>
+</div>
                             </div>
                             <div class="col-md-6">
                                 <div class="mb-3">
@@ -162,6 +203,64 @@
         // Set active menu item
         document.querySelector('a[href="index.php?controller=admin&action=products"]').parentElement.classList.add('active');
       });
+      
+      function addSize() {
+        const container = document.getElementById('sizesContainer');
+        const sizeRow = document.createElement('div');
+        sizeRow.className = 'size-row d-flex gap-2 mb-2';
+        sizeRow.innerHTML = `
+            <select class="form-select" name="sizes[]" style="width: 100px;" required>
+                <option value="">Size</option>
+                <option value="S">S</option>
+                <option value="M">M</option>
+                <option value="L">L</option>
+                <option value="XL">XL</option>
+                <option value="XXL">XXL</option>
+            </select>
+            <input type="number" class="form-control" name="stock[]" 
+                   placeholder="Số lượng tồn" min="1" required>
+            <button type="button" class="btn btn-danger btn-sm" onclick="removeSize(this)">
+                <i class="fas fa-times"></i>
+            </button>
+        `;
+        container.appendChild(sizeRow);
+    }
+
+    function removeSize(button) {
+        const sizeRows = document.querySelectorAll('.size-row');
+        if (sizeRows.length > 1) {
+            button.closest('.size-row').remove();
+        } else {
+            alert('Phải có ít nhất một size cho sản phẩm');
+        }
+    }
+
+    // Form validation
+    document.getElementById('productForm').addEventListener('submit', function(e) {
+        const sizes = document.getElementsByName('sizes[]');
+        const stocks = document.getElementsByName('stock[]');
+        const selectedSizes = new Set();
+        
+        for (let i = 0; i < sizes.length; i++) {
+            if (sizes[i].value === '') {
+                alert('Vui lòng chọn size');
+                e.preventDefault();
+                return;
+            }
+            if (selectedSizes.has(sizes[i].value)) {
+                alert('Không được chọn trùng size');
+                e.preventDefault();
+                return;
+            }
+            selectedSizes.add(sizes[i].value);
+            
+            if (stocks[i].value <= 0) {
+                alert('Số lượng tồn phải lớn hơn 0');
+                e.preventDefault();
+                return;
+            }
+        }
+    });
     </script>
     
     <!-- Bootstrap JS Bundle with Popper -->

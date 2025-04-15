@@ -68,11 +68,32 @@ class Product
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function create($name, $price, $description, $category_id, $stock, $featured)
-    {
-        $stmt = $this->conn->prepare("INSERT INTO products (name, price, description, category_id, stock,featured) VALUES (?, ?, ?, ?, ?,?)");
-        $stmt->execute([$name, $price, $description, $category_id, $stock, $featured]);
-        return $this->conn->lastInsertId();
+    // Thay đổi phương thức create để nhận một mảng thông tin sản phẩm
+    public function create($data) {
+        try {
+            // Prepare the SQL statement
+            $stmt = $this->conn->prepare(
+                "INSERT INTO products (name, price, discount_price, description, category_id, stock, featured) 
+                 VALUES (?, ?, ?, ?, ?, ?, ?)"
+            );
+            
+            // Execute with data
+            $stmt->execute([
+                $data['name'],
+                $data['price'],
+                $data['discount_price'] ?? null,
+                $data['description'],
+                $data['category_id'],
+                $data['stock'],
+                $data['featured']
+            ]);
+            
+            // Get and return the new product ID
+            return $this->conn->lastInsertId();
+        } catch (PDOException $e) {
+            error_log("Error creating product: " . $e->getMessage());
+            throw $e;
+        }
     }
 
     public function addImage($product_id, $image_path)
@@ -213,5 +234,68 @@ class Product
         } catch (PDOException $e) {
             return 0;
         }
+    }
+
+    public function addProductSize($productId, $size, $stock) {
+        $stmt = $this->conn->prepare("INSERT INTO product_sizes (product_id, size, stock) VALUES (?, ?, ?)");
+        return $stmt->execute([$productId, $size, $stock]);
+    }
+
+    public function getProductSizes($productId) {
+        try {
+            $stmt = $this->conn->prepare("SELECT size, stock FROM product_sizes WHERE product_id = ? ORDER BY FIELD(size, 'S', 'M', 'L', 'XL', 'XXL')");
+            $stmt->execute([$productId]);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Error getting product sizes: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    public function updateProductSizes($productId, $sizes, $stocks) {
+        try {
+            // Begin transaction
+            $this->conn->beginTransaction();
+
+            // Delete existing sizes
+            $stmt = $this->conn->prepare("DELETE FROM product_sizes WHERE product_id = ?");
+            $stmt->execute([$productId]);
+
+            // Insert new sizes
+            $stmt = $this->conn->prepare("INSERT INTO product_sizes (product_id, size, stock) VALUES (?, ?, ?)");
+            foreach ($sizes as $i => $size) {
+                if (!empty($size) && isset($stocks[$i])) {
+                    $stmt->execute([$productId, $size, $stocks[$i]]);
+                }
+            }
+
+            // Commit transaction
+            $this->conn->commit();
+            return true;
+        } catch (PDOException $e) {
+            // Rollback on error
+            $this->conn->rollBack();
+            error_log("Error updating product sizes: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function beginTransaction() {
+        $this->conn->beginTransaction();
+    }
+
+    public function commit() {
+        $this->conn->commit();
+    }
+
+    public function rollback() {
+        if ($this->conn->inTransaction()) {
+            $this->conn->rollBack();
+        }
+    }
+
+    public function deleteProductSizes($productId) {
+        $stmt = $this->conn->prepare("DELETE FROM product_sizes WHERE product_id = ?");
+        return $stmt->execute([$productId]);
     }
 }

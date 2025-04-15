@@ -49,6 +49,19 @@
             color: #495057;
             min-width: 150px;
         }
+        .table {
+            margin-bottom: 0;
+        }
+        .table th, .table td {
+            vertical-align: middle;
+        }
+        .badge {
+            font-size: 0.9rem;
+            padding: 0.5rem 1rem;
+        }
+        .table-light {
+            background-color: #f8f9fa;
+        }
     </style>
 </head>
 <body>
@@ -113,6 +126,51 @@
                                 <span><?= date('d/m/Y H:i', strtotime($product['updated_at'] ?? 'now')) ?></span>
                             </div>
                         </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h5 class="mb-3"><i class="fas fa-box"></i> Size và Số lượng tồn kho</h5>
+                        <?php
+                        $sizes = $productModel->getProductSizes($product['id']);
+                        if (!empty($sizes)): ?>
+                            <div class="table-responsive">
+                                <table class="table table-bordered">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Size</th>
+                                            <th>Số lượng tồn</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php foreach ($sizes as $size): ?>
+                                        <tr>
+                                            <td width="50%">
+                                                <span class="badge bg-primary"><?= htmlspecialchars($size['size']) ?></span>
+                                            </td>
+                                            <td width="50%">
+                                                <span class="badge bg-info"><?= htmlspecialchars($size['stock']) ?> cái</span>
+                                            </td>
+                                        </tr>
+                                        <?php endforeach; ?>
+                                    </tbody>
+                                    <tfoot class="table-light">
+                                        <tr>
+                                            <td><strong>Tổng số lượng:</strong></td>
+                                            <td>
+                                                <strong>
+                                                    <?= array_sum(array_column($sizes, 'stock')) ?> cái
+                                                </strong>
+                                            </td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        <?php else: ?>
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                Sản phẩm chưa có thông tin size và số lượng
+                            </div>
+                        <?php endif; ?>
                     </div>
                     
                     <div class="mb-4">
