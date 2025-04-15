@@ -31,20 +31,78 @@ class AdminController
     public function products()
     {
         $productModel = new Product();
-        $products = $productModel->getAllProducts();
+
+        // Xác định trang hiện tại
+        $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+        $page = max(1, $page); // Đảm bảo trang không nhỏ hơn 1
+
+        // Thiết lập số lượng sản phẩm mỗi trang
+        $itemsPerPage = 10;
+
+        // Tính offset
+        $offset = ($page - 1) * $itemsPerPage;
+
+        // Lấy tổng số sản phẩm
+        $totalProducts = $productModel->getTotalProducts();
+
+        // Tính tổng số trang
+        $totalPages = ceil($totalProducts / $itemsPerPage);
+
+        // Lấy sản phẩm cho trang hiện tại
+        $products = $productModel->getProductsByPage($itemsPerPage, $offset);
+
+        // Truyền các biến vào view
         require_once 'app/views/admin/product/index.php';
     }
 
     public function categories()
     {
         $categoryModel = new Category();
-        $categories = $categoryModel->getAll();
+
+        // Xác định trang hiện tại
+        $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+        $page = max(1, $page); // Đảm bảo trang không nhỏ hơn 1
+
+        // Thiết lập số lượng danh mục mỗi trang
+        $itemsPerPage = 10;
+
+        // Tính offset
+        $offset = ($page - 1) * $itemsPerPage;
+
+        // Lấy tổng số danh mục
+        $totalCategories = $categoryModel->getTotalCategories();
+
+        // Tính tổng số trang
+        $totalPages = ceil($totalCategories / $itemsPerPage);
+
+        // Lấy danh mục cho trang hiện tại
+        $categories = $categoryModel->getCategoriesByPage($itemsPerPage, $offset);
+
         require_once 'app/views/admin/categories/index.php';
     }
     public function users()
     {
         $userModel = new User();
-        $users = $userModel->getAllUsers();
+
+        // Xác định trang hiện tại
+        $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+        $page = max(1, $page); // Đảm bảo trang không nhỏ hơn 1
+
+        // Thiết lập số lượng người dùng mỗi trang
+        $itemsPerPage = 10;
+
+        // Tính offset
+        $offset = ($page - 1) * $itemsPerPage;
+
+        // Lấy tổng số người dùng
+        $totalUsers = $userModel->getTotalUsers();
+
+        // Tính tổng số trang
+        $totalPages = ceil($totalUsers / $itemsPerPage);
+
+        // Lấy người dùng cho trang hiện tại
+        $users = $userModel->getUsersByPage($itemsPerPage, $offset);
+
         require_once 'app/views/admin/users/index.php';
     }
     /**
@@ -53,10 +111,25 @@ class AdminController
     public function orders()
     {
         $orderModel = new Order();
-        $orders = $orderModel->getAllOrders();
 
-        // Lấy thêm thông tin người dùng để hiển thị
-        $userModel = new User();
+        // Xác định trang hiện tại
+        $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+        $page = max(1, $page); // Đảm bảo trang không nhỏ hơn 1
+
+        // Thiết lập số lượng đơn hàng mỗi trang
+        $itemsPerPage = 10;
+
+        // Tính offset
+        $offset = ($page - 1) * $itemsPerPage;
+
+        // Lấy tổng số đơn hàng
+        $totalOrders = $orderModel->getTotalOrders();
+
+        // Tính tổng số trang
+        $totalPages = ceil($totalOrders / $itemsPerPage);
+
+        // Lấy đơn hàng cho trang hiện tại
+        $orders = $orderModel->getOrdersByPage($itemsPerPage, $offset);
 
         require_once 'app/views/admin/orders/index.php';
     }

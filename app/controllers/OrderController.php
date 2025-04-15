@@ -18,40 +18,7 @@ class OrderController extends BaseController
         $this->orderModel = new Order();
     }
 
-    /**
-     * Process checkout and choose payment method
-     */
-    public function checkout()
-    {
-        $this->ensureNotAdmin();
-        $this->ensureUserLoggedIn();
-        if (!$this->isUserLoggedIn()) {
-            $_SESSION['error'] = 'You must be logged in to checkout';
-            header('Location: index.php?controller=cart');
-            exit;
-        }
 
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $userId = $_SESSION['user_id'];
-            $orderId = $this->orderModel->checkout($userId);
-
-            if ($orderId) {
-                $_SESSION['order_id'] = $orderId;
-                $_SESSION['message'] = 'Đơn hàng đã được đặt thành công!';
-                header("Location: index.php?controller=order&action=details&id=" . $orderId);
-            } else {
-                // Nếu không có thông báo lỗi cụ thể từ model
-                if (!isset($_SESSION['error'])) {
-                    $_SESSION['error'] = 'Đặt hàng thất bại. Vui lòng thử lại.';
-                }
-                header('Location: index.php?controller=cart');
-            }
-            exit;
-        }
-
-        $data['title'] = 'Checkout';
-        require_once 'app/views/orders/checkout.php';
-    }
 
     /**
      * Payment selection page
@@ -208,5 +175,53 @@ class OrderController extends BaseController
 
         header('Location: index.php?controller=order&action=history');
         exit;
+    }
+
+    public function checkout()
+    {
+        $this->ensureNotAdmin();
+        $this->ensureUserLoggedIn();
+        $userId = $_SESSION['user_id'];
+        $cartModel = new Cart();
+        $cartItems = $cartModel->getCartItems($userId);
+
+        if (empty($cartItems)) {
+            $_SESSION['error'] = 'Giỏ hàng của bạn đang trống!';
+            header('Location: index.php?controller=cart');
+            exit;
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            // Xử lý thanh toán COD
+            $cartTotal = $cartModel->getCartTotal($userId);
+            $voucherId = null;
+            $discountAmount = 0;
+
+            // Kiểm tra xem có voucher được áp dụng không
+            if (isset($_SESSION['voucher'])) {
+                $voucherId = $_SESSION['voucher']['id'];
+                $discountAmount = $_SESSION['voucher']['discount_amount'];
+            }
+
+            $orderId = $this->orderModel->checkout($userId, $voucherId, $discountAmount);
+
+            if ($orderId) {
+                // Xóa voucher khỏi session sau khi đã áp dụng
+                unset($_SESSION['voucher']);
+
+                $_SESSION['message'] = 'Đơn hàng đã được đặt thành công!';
+                header("Location: index.php?controller=order&action=details&id=" . $orderId);
+            } else {
+                // Nếu không có thông báo lỗi cụ thể từ model
+                if (!isset($_SESSION['error'])) {
+                    $_SESSION['error'] = 'Đặt hàng thất bại. Vui lòng thử lại.';
+                }
+                header('Location: index.php?controller=cart');
+            }
+            exit;
+        }
+
+        $data['title'] = 'Checkout';
+        require_once 'app/views/orders/checkout.php';
     }
 }

@@ -29,6 +29,15 @@ $_SESSION['pending_order'] = [
     'items' => $cartItems
 ];
 
+// Thêm đoạn này vào phần đầu file, sau khi đã lấy thông tin giỏ hàng
+if (isset($_SESSION['voucher'])) {
+    $_SESSION['pending_order']['voucher_id'] = $_SESSION['voucher']['id'];
+    $_SESSION['pending_order']['discount_amount'] = $_SESSION['voucher']['discount_amount'];
+    $_SESSION['pending_order']['voucher_code'] = $_SESSION['voucher']['code'];
+    // Giảm giá từ tổng tiền
+    $_SESSION['pending_order']['total_price'] -= $_SESSION['voucher']['discount_amount'];
+}
+
 $title = 'Thanh toán';
 ?>
 
@@ -313,16 +322,32 @@ $title = 'Thanh toán';
                         <?php
                         $subtotal = $cartTotal;
                         $shipping = 0; // Có thể thay đổi nếu có phí vận chuyển
-                        $total = $subtotal + $shipping;
+                        $discount = 0;
+
+                        // Kiểm tra nếu có voucher được áp dụng
+                        if (isset($_SESSION['voucher'])) {
+                            $discount = $_SESSION['voucher']['discount_amount'];
+                        }
+
+                        $total = $subtotal + $shipping - $discount;
                         ?>
                         <div class="summary-item">
                             <span>Tạm tính:</span>
                             <span><?= number_format($subtotal, 0, ',', '.') ?> ₫</span>
                         </div>
+
+                        <?php if ($discount > 0): ?>
+                            <div class="summary-item">
+                                <span>Giảm giá (Mã: <?= $_SESSION['voucher']['code'] ?>):</span>
+                                <span class="text-danger">-<?= number_format($discount, 0, ',', '.') ?> ₫</span>
+                            </div>
+                        <?php endif; ?>
+
                         <div class="summary-item">
                             <span>Phí vận chuyển:</span>
                             <span><?= $shipping > 0 ? number_format($shipping, 0, ',', '.') . ' ₫' : 'Miễn phí' ?></span>
                         </div>
+
                         <div class="summary-total">
                             <span>Tổng cộng:</span>
                             <span><?= number_format($total, 0, ',', '.') ?> ₫</span>
@@ -336,9 +361,13 @@ $title = 'Thanh toán';
                             </form>
 
                             <form action="config/vnpay_create_payment.php" id="vnpayForm" method="post">
-                                <input type="hidden" name="amount" value="<?= $cartTotal ?>">
+                                <input type="hidden" name="amount" value="<?= $total ?>">
                                 <input type="hidden" name="language" value="vn">
                                 <input type="hidden" name="bankCode" value="">
+                                <?php if (isset($_SESSION['voucher'])): ?>
+                                    <input type="hidden" name="voucher_id" value="<?= $_SESSION['voucher']['id'] ?>">
+                                    <input type="hidden" name="discount_amount" value="<?= $_SESSION['voucher']['discount_amount'] ?>">
+                                <?php endif; ?>
                                 <button type="submit" class="payment-button btn-vnpay" id="vnpayButton">
                                     <i class="fas fa-university me-2"></i>Thanh toán qua VNPAY
                                 </button>
