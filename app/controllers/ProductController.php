@@ -65,45 +65,90 @@ class ProductController extends BaseController
     }
 
     // Tạo sản phẩm mới
-    public function create()
-    {
-        $categoryModel = new Category();
-        $categories = $categoryModel->getAllCategories();
-
+    public function create() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $name = $_POST['name'] ?? '';
-            $price = $_POST['price'] ?? 0;
-            $description = $_POST['description'] ?? '';
-            $category_id = $_POST['category_id'] ?? 0;
-            $stock = $_POST['stock'] ?? 0;
-            $featured = $_POST['featured'] ?? 0;
+            try {
+                $productModel = new Product();
+                
+                // Start transaction
+                $productModel->beginTransaction();
 
-            $productModel = new Product();
-            $productId = $productModel->create($name, $price, $description, $category_id, $stock, $featured);
-
-            // Xử lý upload hình ảnh
-            if ($productId && !empty($_FILES['images'])) {
-                $uploadDir = 'public/images/';
-                if (!is_dir($uploadDir)) {
-                    mkdir($uploadDir, 0755, true);
+                // Calculate discount price if using percentage
+                $discount_price = null;
+                if (!empty($_POST['discount_type'])) {
+                    if ($_POST['discount_type'] === 'fixed') {
+                        $discount_price = $_POST['discount_price'];
+                    } else if ($_POST['discount_type'] === 'percent' && !empty($_POST['discount_percent'])) {
+                        $price = $_POST['price'];
+                        $percent = $_POST['discount_percent'];
+                        $discount_price = $price * (1 - $percent/100);
+                        $discount_price = floor($discount_price/1000) * 1000; // Round to nearest thousand
+                    }
                 }
 
-                foreach ($_FILES['images']['tmp_name'] as $key => $tmp_name) {
-                    if ($_FILES['images']['error'][$key] === UPLOAD_ERR_OK) {
-                        $fileName = time() . '_' . basename($_FILES['images']['name'][$key]);
-                        $filePath = $uploadDir . $fileName;
+                // Create product first
+                $productId = $productModel->create([
+                    'name' => $_POST['name'],
+                    'price' => $_POST['price'],
+                    'discount_price' => $discount_price,
+                    'description' => $_POST['description'],
+                    'category_id' => $_POST['category_id'],
+                    'stock' => array_sum($_POST['stock'] ?? []),
+                    'featured' => $_POST['featured'] ?? 0
+                ]);
 
-                        if (move_uploaded_file($tmp_name, $filePath)) {
-                            $productModel->addImage($productId, $fileName);
+                if (!$productId) {
+                    throw new Exception("Không thể tạo sản phẩm");
+                }
+
+                // Add sizes
+                $sizes = $_POST['sizes'] ?? [];
+                $stocks = $_POST['stock'] ?? [];
+                
+                foreach ($sizes as $i => $size) {
+                    if (!empty($size) && isset($stocks[$i]) && $stocks[$i] > 0) {
+                        $productModel->addProductSize($productId, $size, $stocks[$i]);
+                    }
+                }
+
+                // Handle image uploads if any
+                if (!empty($_FILES['images']['name'][0])) {
+                    $uploadDir = 'public/images/';
+                    if (!is_dir($uploadDir)) {
+                        mkdir($uploadDir, 0755, true);
+                    }
+
+                    foreach ($_FILES['images']['tmp_name'] as $key => $tmp_name) {
+                        if ($_FILES['images']['error'][$key] === UPLOAD_ERR_OK) {
+                            $fileName = time() . '_' . basename($_FILES['images']['name'][$key]);
+                            $filePath = $uploadDir . $fileName;
+                            
+                            if (move_uploaded_file($tmp_name, $filePath)) {
+                                $productModel->addImage($productId, $fileName);
+                            }
                         }
                     }
                 }
-            }
 
-            header("Location: index.php?controller=admin&action=products&success=1");
-            exit;
+                // Commit transaction
+                $productModel->commit();
+                
+                $_SESSION['success'] = "Sản phẩm đã được tạo thành công";
+                header("Location: index.php?controller=admin&action=products");
+                exit;
+
+            } catch (Exception $e) {
+                if (isset($productModel)) {
+                    $productModel->rollback();
+                }
+                $error = $e->getMessage();
+            }
         }
 
+        // Load categories for the form
+        $categoryModel = new Category();
+        $categories = $categoryModel->getAllCategories();
+        
         require_once 'app/views/admin/product/create.php';
     }
 
@@ -125,28 +170,77 @@ class ProductController extends BaseController
     }
 
     // Chỉnh sửa sản phẩm
-    public function edit($id)
+    public function edit($id) 
     {
         $productModel = new Product();
         $categoryModel = new Category();
 
         $product = $productModel->getProductById($id);
         $categories = $categoryModel->getAllCategories();
+        $sizes = $productModel->getProductSizes($id);
+        $images = $productModel->getProductImages($id);
         $error = null;
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $name = $_POST['name'] ?? '';
-            $price = $_POST['price'] ?? 0;
-            $description = $_POST['description'] ?? '';
-            $category_id = $_POST['category_id'] ?? 0;
-            $stock = $_POST['stock'] ?? 0;
-            $featured = $_POST['featured'] ?? 0;
+            try {
+                // Lấy dữ liệu từ form
+                $name = $_POST['name'] ?? '';
+                $price = $_POST['price'] ?? 0;
+                $description = $_POST['description'] ?? '';
+                $category_id = $_POST['category_id'] ?? 0;
+                $featured = $_POST['featured'] ?? 0;
+                $sizes = $_POST['sizes'] ?? [];
+                $stocks = $_POST['stock'] ?? [];
 
-            if ($productModel->update($id, $name, $price, $description, $category_id, $stock, $featured)) {
-                header("Location: index.php?controller=admin&action=products&success=1");
+                // Validate dữ liệu
+                if (empty($name) || $price <= 0 || empty($category_id)) {
+                    throw new Exception("Vui lòng điền đầy đủ thông tin bắt buộc");
+                }
+
+                // Bắt đầu transaction
+                $productModel->beginTransaction();
+
+                // Cập nhật thông tin cơ bản của sản phẩm
+                $result = $productModel->update($id, $name, $price, $description, $category_id, array_sum($stocks), $featured);
+
+                if (!$result) {
+                    throw new Exception("Lỗi khi cập nhật thông tin sản phẩm");
+                }
+
+                // Xóa size cũ và thêm size mới
+                $productModel->deleteProductSizes($id);
+                foreach ($sizes as $index => $size) {
+                    if (!empty($size) && isset($stocks[$index]) && $stocks[$index] > 0) {
+                        $productModel->addProductSize($id, $size, $stocks[$index]);
+                    }
+                }
+
+                // Xử lý upload ảnh mới nếu có
+                if (!empty($_FILES['images']['name'][0])) {
+                    $uploadDir = 'public/images/';
+                    foreach ($_FILES['images']['tmp_name'] as $key => $tmp_name) {
+                        if ($_FILES['images']['error'][$key] === UPLOAD_ERR_OK) {
+                            $fileName = time() . '_' . basename($_FILES['images']['name'][$key]);
+                            $filePath = $uploadDir . $fileName;
+                            
+                            if (move_uploaded_file($tmp_name, $filePath)) {
+                                $productModel->addImage($id, $fileName);
+                            }
+                        }
+                    }
+                }
+
+                // Commit transaction
+                $productModel->commit();
+                
+                $_SESSION['message'] = "Cập nhật sản phẩm thành công";
+                header("Location: index.php?controller=admin&action=products");
                 exit;
-            } else {
-                $error = "Lỗi khi cập nhật sản phẩm. Vui lòng thử lại.";
+
+            } catch (Exception $e) {
+                // Rollback nếu có lỗi
+                $productModel->rollback();
+                $error = $e->getMessage();
             }
         }
 
@@ -261,4 +355,6 @@ class ProductController extends BaseController
         $relatedProducts = $productModel->getRelatedProducts($product['category_id'], $id);
         require_once 'app/views/products/detail.php';
     }
+
+    
 }
