@@ -8,7 +8,15 @@ class Banner {
         global $conn;
         $this->conn = $conn;
     }
-
+    public function getActiveBanners() {
+        try {
+            $stmt = $this->conn->query("SELECT * FROM side_banners WHERE status = 'active' ORDER BY created_at DESC");
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            return [];
+        }
+    }
+    
     public function getAllBanners() {
         try {
             $stmt = $this->conn->query("SELECT * FROM side_banners ORDER BY created_at DESC");
