@@ -119,64 +119,65 @@
       color: #6c757d;
       /* Màu xám cho các nút bị disabled */
     }
-    
+
     .size-stock-container {
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-        max-width: 150px; /* Giới hạn chiều rộng */
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      max-width: 150px;
+      /* Giới hạn chiều rộng */
     }
-    
+
     .size-stock-item {
-        display: flex;
-        align-items: center;
-        gap: 4px;
-        flex-wrap: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-wrap: nowrap;
     }
-    
+
     .size-stock-item .badge {
-        font-size: 0.8rem;
-        white-space: nowrap;
+      font-size: 0.8rem;
+      white-space: nowrap;
     }
 
     /* Style cho badge danh mục */
     .badge.bg-secondary {
-        font-size: 0.9rem;
-        padding: 6px 12px;
+      font-size: 0.9rem;
+      padding: 6px 12px;
     }
 
     .price-container {
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
     }
-    
+
     .old-price {
-        text-decoration: line-through;
-        color: #999;
-        font-size: 0.85rem;
-        background-color: #f8f9fa;
+      text-decoration: line-through;
+      color: #999;
+      font-size: 0.85rem;
+      background-color: #f8f9fa;
     }
-    
+
     .new-price {
-        color: #dc3545;
-        font-weight: bold;
-        background-color: #fff8f8;
+      color: #dc3545;
+      font-weight: bold;
+      background-color: #fff8f8;
     }
-    
+
     .discount-badge {
-        display: inline-block;
-        padding: 2px 6px;
-        background-color: #dc3545;
-        color: white;
-        border-radius: 4px;
-        font-size: 0.75rem;
-        font-weight: bold;
+      display: inline-block;
+      padding: 2px 6px;
+      background-color: #dc3545;
+      color: white;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: bold;
     }
-    
+
     .price-badge {
-        display: block;
-        margin-bottom: 4px;
+      display: block;
+      margin-bottom: 4px;
     }
   </style>
 </head>
@@ -246,40 +247,40 @@
                           <!-- Thay thế phần hiển thị giá cũ -->
                           <td>
                             <div class="price-container">
-                                <?php if (!empty($product['discount_price'])): ?>
-                                    <span class="price-badge old-price">
-                                        <?= number_format($product['price'], 0, ',', '.') ?> đ
-                                    </span>
-                                    <span class="price-badge new-price">
-                                        <?= number_format($product['discount_price'], 0, ',', '.') ?> đ
-                                    </span>
-                                    <?php 
-                                    $discountPercent = round((($product['price'] - $product['discount_price']) / $product['price']) * 100);
-                                    ?>
-                                    <span class="discount-badge">
-                                        -<?= $discountPercent ?>%
-                                    </span>
-                                <?php else: ?>
-                                    <span class="price-badge">
-                                        <?= number_format($product['price'], 0, ',', '.') ?> đ
-                                    </span>
-                                <?php endif; ?>
+                              <?php if (!empty($product['discount_price']) && $product['discount_price'] < $product['price']): ?>
+                                <span class="price-badge old-price">
+                                  <?= number_format($product['price'], 0, ',', '.') ?> đ
+                                </span>
+                                <span class="price-badge new-price">
+                                  <?= number_format($product['discount_price'], 0, ',', '.') ?> đ
+                                </span>
+                                <?php
+                                $discountPercent = round((($product['price'] - $product['discount_price']) / $product['price']) * 100);
+                                ?>
+                                <span class="discount-badge">
+                                  -<?= $discountPercent ?>%
+                                </span>
+                              <?php else: ?>
+                                <span class="price-badge">
+                                  <?= number_format($product['price'], 0, ',', '.') ?> đ
+                                </span>
+                              <?php endif; ?>
                             </div>
                           </td>
                           <td>
                             <?php
                             $sizes = $productModel->getProductSizes($product['id']);
                             if (!empty($sizes)) {
-                                echo '<div class="size-stock-container">';
-                                foreach ($sizes as $size) {
-                                    echo '<div class="size-stock-item">';
-                                    echo '<span class="badge bg-primary me-1">Size ' . htmlspecialchars($size['size']) . '</span>';
-                                    echo '<span class="badge bg-info">' . htmlspecialchars($size['stock']) . ' cái</span>';
-                                    echo '</div>';
-                                }
+                              echo '<div class="size-stock-container">';
+                              foreach ($sizes as $size) {
+                                echo '<div class="size-stock-item">';
+                                echo '<span class="badge bg-primary me-1">Size ' . htmlspecialchars($size['size']) . '</span>';
+                                echo '<span class="badge bg-info">' . htmlspecialchars($size['stock']) . ' cái</span>';
                                 echo '</div>';
+                              }
+                              echo '</div>';
                             } else {
-                                echo '<span class="text-muted">Chưa có size</span>';
+                              echo '<span class="text-muted">Chưa có size</span>';
                             }
                             ?>
                           </td>

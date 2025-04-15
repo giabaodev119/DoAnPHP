@@ -216,4 +216,30 @@ class AdminController
         $banners = $bannerModel->getAllBanners();
         require_once 'app/views/admin/banner/index.php';
     }
+    public function promotions()
+    {
+        require_once 'app/models/Promotion.php';
+        $promotionModel = new Promotion();
+
+        // Xác định trang hiện tại
+        $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+        $page = max(1, $page);
+
+        // Thiết lập số lượng chương trình khuyến mãi mỗi trang
+        $itemsPerPage = 10;
+
+        // Tính offset
+        $offset = ($page - 1) * $itemsPerPage;
+
+        // Lấy tổng số chương trình khuyến mãi
+        $totalPromotions = $promotionModel->getTotalPromotions();
+
+        // Tính tổng số trang
+        $totalPages = ceil($totalPromotions / $itemsPerPage);
+
+        // Lấy danh sách khuyến mãi cho trang hiện tại
+        $promotions = $promotionModel->getPromotionsByPage($itemsPerPage, $offset);
+
+        require_once 'app/views/admin/promotion/index.php';
+    }
 }

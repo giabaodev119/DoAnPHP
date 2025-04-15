@@ -98,11 +98,47 @@
 
             <div class="col-md-6">
                 <h1><?= htmlspecialchars($product['name']) ?></h1>
-                <p class="text-danger fw-bold fs-4"><?= number_format($product['price'], 0, ',', '.') ?> đ</p>
+
+                <!-- Hiển thị giảm giá nếu có -->
+                <?php if (!empty($product['discount_price']) && $product['discount_price'] < $product['price']): ?>
+                    <div class="mb-2">
+                        <span class="text-decoration-line-through text-muted fs-5"><?= number_format($product['price'], 0, ',', '.') ?> đ</span>
+                        <span class="text-danger fw-bold fs-4 ms-2"><?= number_format($product['discount_price'], 0, ',', '.') ?> đ</span>
+                        <?php
+                        $discountPercent = round((($product['price'] - $product['discount_price']) / $product['price']) * 100);
+                        ?>
+                        <span class="badge bg-danger ms-2">-<?= $discountPercent ?>%</span>
+                    </div>
+                <?php else: ?>
+                    <p class="text-danger fw-bold fs-4"><?= number_format($product['price'], 0, ',', '.') ?> đ</p>
+                <?php endif; ?>
 
                 <div class="mb-3">
                     <h4>Thông tin sản phẩm</h4>
                     <p><?= nl2br(htmlspecialchars($product['description'])) ?></p>
+                </div>
+
+                <!-- Hiển thị thông tin về size và số lượng -->
+                <div class="mb-3">
+                    <h4>Kích cỡ:</h4>
+                    <?php
+                    // Lấy thông tin về các size của sản phẩm
+                    $productModel = new Product();
+                    $sizes = $productModel->getProductSizes($product['id']);
+
+                    if (!empty($sizes)):
+                    ?>
+                        <div class="d-flex flex-wrap gap-2 mb-3">
+                            <?php foreach ($sizes as $size): ?>
+                                <div class="size-box border p-2 text-center" style="min-width: 80px;">
+                                    <div class="fw-bold"><?= htmlspecialchars($size['size']) ?></div>
+                                    <small class="text-muted">Còn <?= htmlspecialchars($size['stock']) ?> sản phẩm</small>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php else: ?>
+                        <p class="text-muted">Không có thông tin về kích cỡ.</p>
+                    <?php endif; ?>
                 </div>
 
                 <div class="mb-3">
@@ -112,6 +148,24 @@
 
                 <form action="index.php?controller=product&action=addToCart&id=<?= $product['id'] ?>" method="post" class="mb-3">
                     <input type="hidden" name="product_id" value="<?= $product['id'] ?>">
+
+                    <!-- Thêm chọn size nếu có thông tin size -->
+                    <?php if (!empty($sizes)): ?>
+                        <div class="mb-3">
+                            <label for="size" class="form-label">Chọn kích cỡ:</label>
+                            <select class="form-select" id="size" name="size" required style="width: 150px;">
+                                <option value="">-- Chọn size --</option>
+                                <?php foreach ($sizes as $size): ?>
+                                    <?php if ($size['stock'] > 0): ?>
+                                        <option value="<?= htmlspecialchars($size['size']) ?>"><?= htmlspecialchars($size['size']) ?> (<?= $size['stock'] ?>)</option>
+                                    <?php else: ?>
+                                        <option value="<?= htmlspecialchars($size['size']) ?>" disabled><?= htmlspecialchars($size['size']) ?> (Hết hàng)</option>
+                                    <?php endif; ?>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                    <?php endif; ?>
+
                     <div class="mb-3">
                         <label for="quantity" class="form-label">Số lượng:</label>
                         <input type="number" class="form-control" id="quantity" name="quantity" value="1" min="1" style="width: 100px;">

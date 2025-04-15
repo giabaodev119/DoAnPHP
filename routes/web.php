@@ -10,6 +10,7 @@ require_once 'app/controllers/CartController.php';
 require_once 'app/controllers/OrderController.php';
 require_once 'app/controllers/SideBannerController.php';
 require_once 'app/controllers/VoucherController.php';
+require_once 'app/controllers/PromotionController.php';
 // Có thể bổ sung thêm nếu cần: UserController, OrderController, ...
 
 // Lấy controller và action từ URL, mặc định là trang chủ
@@ -87,11 +88,9 @@ switch ($controller) {
             $userController->logout();
         } elseif ($action === 'profile') {
             $userController->profile();
-        } elseif ($action === 'editProfile') {
-            $userController->editProfile();
         } elseif ($action === 'updateProfile') {
             $userController->updateProfile();
-        }  
+        }
         break;
 
 
@@ -172,6 +171,19 @@ switch ($controller) {
             $voucherController->apply();
         } elseif ($action === 'remove') {
             $voucherController->remove();
+        }
+        break;
+
+    case 'promotion':
+        $promotionController = new PromotionController();
+        if ($action === 'index') {
+            $promotionController->index();
+        } elseif ($action === 'create') {
+            $promotionController->create();
+        } elseif ($action === 'edit' && isset($_GET['id'])) {
+            $promotionController->edit($_GET['id']);
+        } elseif ($action === 'delete' && isset($_GET['id'])) {
+            $promotionController->delete($_GET['id']);
         }
         break;
 }
