@@ -26,34 +26,34 @@ $activeBanners = $bannerModel->getActiveBanners();
 <section class="banner" style="height: auto;">
     <?php if (!empty($activeBanners)): ?>
         <div class="banner-slider" style="
-    position: relative;
-    width: 1000px;
-    max-width: 100%;
-    margin: 10px auto 30px;
-    overflow: hidden;
-    height: 600px;
-    border-radius: 8px;
-">
-    <div class="banner-track" style="
-        display: flex;
-        width: <?= count($activeBanners) * 34 ?>%;">
-        <?php foreach ($activeBanners as $banner): ?>
-            <div class="banner-slide" style="
-                flex: 0 0 100%;
-                position: relative;
-            ">
-                <img src="public/images/banners/<?php echo $banner['image_path']; ?>" 
-                    alt="<?php echo htmlspecialchars($banner['title']); ?>" 
-                    style="width: 100%; height: 600px; object-fit: cover; filter: brightness(60%);">
-
-                <div class="banner-title"
-                    style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-                        color: white; font-size: 24px; font-weight: bold; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">
-                    <?= htmlspecialchars($banner['title']) ?>
-                </div>
+            position: relative;
+            width: 1000px;
+            max-width: none;
+            margin: 10px auto 30px;
+            overflow: hidden;
+            height: 600px;
+            border-radius: 8px;">
+            <div class="banner-track" style="
+                display: flex;
+                width: <?= count($activeBanners) * 1000 ?>px;
+                transform: translateX(0);
+                transition: transform 0.5s ease-in-out;">
+                <?php foreach ($activeBanners as $banner): ?>
+                    <div class="banner-slide" style="
+                        flex: 0 0 1000px;
+                        width: 1000px;
+                        position: relative;">
+                        <img src="public/images/banners/<?php echo $banner['image_path']; ?>" 
+                            alt="<?php echo htmlspecialchars($banner['title']); ?>" 
+                            style="width: 1000px; height: 600px; object-fit: cover; filter: brightness(60%);">
+                        <div class="banner-title"
+                            style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+                                color: white; font-size: 24px; font-weight: bold; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">
+                            <?= htmlspecialchars($banner['title']) ?>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
             </div>
-        <?php endforeach; ?>
-    </div>
 
     <!-- Pagination -->
     <div class="banner-pagination" style="
@@ -87,7 +87,8 @@ $activeBanners = $bannerModel->getActiveBanners();
     let currentIndex = 0;
 
     function showSlide(index) {
-        track.style.transform = `translateX(-${index * 100}%)`;
+        // Thay đổi từ phần trăm sang pixel
+        track.style.transform = `translateX(-${index * 1000}px)`;
         dots.forEach((dot, i) => {
             dot.style.backgroundColor = i === index ? '#fff' : 'rgba(255, 255, 255, 0.5)';
         });
