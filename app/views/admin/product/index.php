@@ -373,7 +373,7 @@
                     <?php else: ?>
                       <li class="page-item disabled">
                         <a class="page-link" href="#" aria-label="Trang sau">
-                          <span aria-hidden="true">&raquo;</span>
+                          <span aria-hidden="true">Sau</span>
                         </a>
                       </li>
                     <?php endif; ?>

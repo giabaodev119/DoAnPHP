@@ -309,15 +309,36 @@ class Order
     public function getOrderItems($orderId)
     {
         try {
+            // First get order information including total price
+            $orderStmt = $this->conn->prepare("
+            SELECT o.total_price, o.id as order_id,
+            (SELECT COUNT(*) > 0 FROM voucher_usage vu WHERE vu.order_id = o.id) as has_voucher,
+            (SELECT discount_amount FROM voucher_usage vu WHERE vu.order_id = o.id) as discount_amount,
+            (SELECT v.code FROM voucher_usage vu JOIN vouchers v ON vu.voucher_id = v.id WHERE vu.order_id = o.id) as voucher_code
+            FROM orders o
+            WHERE o.id = ?
+        ");
+            $orderStmt->execute([$orderId]);
+            $orderInfo = $orderStmt->fetch(PDO::FETCH_ASSOC);
+
+            // Then get order items
             $stmt = $this->conn->prepare("
-            SELECT oi.*, p.name as product_name, p.slug as product_slug,
+            SELECT oi.*, p.name as product_name,
             (SELECT image_path FROM product_images WHERE product_id = oi.product_id LIMIT 1) as image_path
             FROM order_items oi
             JOIN products p ON oi.product_id = p.id
             WHERE oi.order_id = ?
         ");
             $stmt->execute([$orderId]);
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            // Combine the results
+            $result = [
+                'items' => $items,
+                'order_info' => $orderInfo
+            ];
+
+            return $result;
         } catch (PDOException $e) {
             error_log("[" . date('Y-m-d H:i:s') . "] Database error in getOrderItems(): " . $e->getMessage());
             return [];

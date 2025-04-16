@@ -56,11 +56,32 @@ class ProductController extends BaseController
         $keyword = isset($_GET['keyword']) ? trim($_GET['keyword']) : '';
         $category = isset($_GET['category']) ? $_GET['category'] : '';
 
-        // Gọi model để tìm kiếm sản phẩm
-        $productModel = new Product();
-        $products = $productModel->searchProducts($keyword, $category);
+        // Pagination parameters
+        $itemsPerPage = 12; // Number of products per page
+        $currentPage = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+        $currentPage = max(1, $currentPage); // Ensure page is at least 1
+        $offset = ($currentPage - 1) * $itemsPerPage;
 
-        // Load giao diện kết quả tìm kiếm
+        // Get product model
+        $productModel = new Product();
+
+        // Get total number of products matching the search
+        $totalProducts = $productModel->countSearchResults($keyword, $category);
+
+        // Calculate total pages
+        $totalPages = ceil($totalProducts / $itemsPerPage);
+
+        // Get paginated search results
+        $products = $productModel->searchProducts($keyword, $category, $itemsPerPage, $offset);
+
+        // Pass pagination data to the view
+        $pagination = [
+            'currentPage' => $currentPage,
+            'totalPages' => $totalPages,
+            'totalProducts' => $totalProducts
+        ];
+
+        // Load search results view
         require_once 'app/views/home/search.php';
     }
 
