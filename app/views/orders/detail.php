@@ -185,6 +185,74 @@ if (!isset($orderId) && isset($_SESSION['order_id'])) {
                     </div>
                 </div>
 
+                <!-- Chi tiết sản phẩm trong đơn hàng -->
+                <?php if (isset($orderItems) && !empty($orderItems)): ?>
+                    <div class="order-products mt-4">
+                        <h5 class="mb-3">Chi tiết sản phẩm</h5>
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Sản phẩm</th>
+                                        <th class="text-center">Giá</th>
+                                        <th class="text-center">Số lượng</th>
+                                        <th class="text-end">Thành tiền</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php
+                                    $total = 0;
+                                    foreach ($orderItems as $item):
+                                        $itemTotal = $item['price'] * $item['quantity'];
+                                        $total += $itemTotal;
+                                    ?>
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <?php if (!empty($item['image_path'])): ?>
+                                                        <img src="public/images/<?= htmlspecialchars($item['image_path']) ?>"
+                                                            class="me-3" alt="<?= htmlspecialchars($item['product_name']) ?>"
+                                                            style="width: 60px; height: 60px; object-fit: cover;">
+                                                    <?php else: ?>
+                                                        <img src="public/images/default.jpg"
+                                                            class="me-3" alt="<?= htmlspecialchars($item['product_name']) ?>"
+                                                            style="width: 60px; height: 60px; object-fit: cover;">
+                                                    <?php endif; ?>
+                                                    <div>
+                                                        <div class="fw-bold"><?= htmlspecialchars($item['product_name']) ?></div>
+                                                        <?php if (!empty($item['size'])): ?>
+                                                            <small class="text-muted">Size: <?= htmlspecialchars($item['size']) ?></small>
+                                                        <?php endif; ?>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="text-center"><?= number_format($item['price'], 0, ',', '.') ?> đ</td>
+                                            <td class="text-center"><?= $item['quantity'] ?></td>
+                                            <td class="text-end"><?= number_format($itemTotal, 0, ',', '.') ?> đ</td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                                <tfoot class="table-light">
+                                    <?php if (isset($orderInfo['has_voucher']) && $orderInfo['has_voucher']): ?>
+                                        <tr>
+                                            <td colspan="3" class="text-end">Tạm tính:</td>
+                                            <td class="text-end"><?= number_format($total, 0, ',', '.') ?> đ</td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="3" class="text-end">Giảm giá (Mã: <?= $orderInfo['voucher_code'] ?>):</td>
+                                            <td class="text-end text-danger">-<?= number_format($orderInfo['discount_amount'], 0, ',', '.') ?> đ</td>
+                                        </tr>
+                                    <?php endif; ?>
+                                    <tr>
+                                        <td colspan="3" class="text-end fw-bold">Tổng cộng:</td>
+                                        <td class="text-end fw-bold"><?= isset($orderInfo['total_price']) ? number_format($orderInfo['total_price'], 0, ',', '.') : number_format($total, 0, ',', '.') ?> đ</td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                <?php endif; ?>
+
                 <p class="mb-4">Chúng tôi sẽ xử lý đơn hàng của bạn trong thời gian sớm nhất. Bạn có thể theo dõi trạng thái đơn hàng trong mục "Lịch sử đơn hàng" tại trang cá nhân.</p>
 
                 <div class="d-flex justify-content-center flex-wrap gap-3">
@@ -193,8 +261,8 @@ if (!isset($orderId) && isset($_SESSION['order_id'])) {
                     </a>
 
                     <?php if (isset($orderId)): ?>
-                        <a href="index.php?controller=order&action=details&id=<?= $orderId ?>" class="btn-order text-decoration-none">
-                            <i class="fas fa-receipt me-2"></i>Xem đơn hàng
+                        <a href="index.php?controller=order&action=history" class="btn-order text-decoration-none">
+                            <i class="fas fa-receipt me-2"></i>Xem lịch sử đơn hàng
                         </a>
                     <?php endif; ?>
                 </div>

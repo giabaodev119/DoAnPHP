@@ -87,21 +87,56 @@ class Product
         $stmt->execute([$product_id, $image_path]);
     }
 
-    public function searchProducts($keyword, $category)
+    public function searchProducts($keyword, $category, $limit = null, $offset = null)
     {
         $sql = "
-            SELECT 
-                p.*, 
-                c.name AS category_name 
-            FROM 
-                products p
-            LEFT JOIN 
-                categories c 
-            ON 
-                p.category_id = c.id
-            WHERE 
-                p.name LIKE :keyword
-        ";
+        SELECT 
+            p.*, 
+            c.name AS category_name 
+        FROM 
+            products p
+        LEFT JOIN 
+            categories c 
+        ON 
+            p.category_id = c.id
+        WHERE 
+            p.name LIKE :keyword
+    ";
+        if (!empty($category)) {
+            $sql .= " AND p.category_id = :category";
+        }
+
+        // Add ORDER BY for consistent pagination
+        $sql .= " ORDER BY p.id DESC";
+
+        // Add LIMIT and OFFSET for pagination
+        if ($limit !== null) {
+            $sql .= " LIMIT :limit OFFSET :offset";
+        }
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':keyword', "%$keyword%", PDO::PARAM_STR);
+        if (!empty($category)) {
+            $stmt->bindValue(':category', $category, PDO::PARAM_INT);
+        }
+
+        if ($limit !== null) {
+            $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+            $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+        }
+
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    // Add a method to count total search results for pagination
+    public function countSearchResults($keyword, $category)
+    {
+        $sql = "
+        SELECT COUNT(*) as total
+        FROM products p
+        WHERE p.name LIKE :keyword
+    ";
         if (!empty($category)) {
             $sql .= " AND p.category_id = :category";
         }
@@ -111,9 +146,10 @@ class Product
         if (!empty($category)) {
             $stmt->bindValue(':category', $category, PDO::PARAM_INT);
         }
-        $stmt->execute();
 
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $stmt->execute();
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        return (int)$result['total'];
     }
 
     public function update($id, $name, $price, $discount_price, $description, $category_id, $featured)

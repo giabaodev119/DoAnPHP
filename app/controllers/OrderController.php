@@ -38,33 +38,37 @@ class OrderController extends BaseController
     /**
      * View order details
      */
-    public function details()
+    public function details($id = null)
     {
-        $this->ensureNotAdmin();
         $this->ensureUserLoggedIn();
-        if (!$this->isUserLoggedIn()) {
-            $_SESSION['error'] = 'You must be logged in to view order details';
-            header('Location: index.php?controller=home');
-            exit;
+
+        // Get order ID from URL if not passed directly
+        if (!$id) {
+            $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
         }
 
-        $orderId = isset($_GET['id']) ? (int) $_GET['id'] : 0;
-        if (!$orderId) {
-            $_SESSION['error'] = 'Invalid order ID';
+        if (!$id) {
+            $_SESSION['error'] = 'Mã đơn hàng không hợp lệ';
             header('Location: index.php?controller=order&action=history');
             exit;
         }
 
-        $data = [];
-        $data['order'] = $this->orderModel->getOrderDetails($orderId);
+        $userId = $_SESSION['user_id'];
+        $order = $this->orderModel->getOrderDetails($id);
 
-        if (!$data['order']) {
-            $_SESSION['error'] = 'Order not found';
+        // Verify this order belongs to the current user
+        if (!$order || $order['user_id'] != $userId) {
+            $_SESSION['error'] = 'Bạn không có quyền xem đơn hàng này';
             header('Location: index.php?controller=order&action=history');
             exit;
         }
 
-        $data['title'] = 'Order Details';
+        // Get order items
+        $orderData = $this->orderModel->getOrderItems($id);
+        $orderItems = $orderData['items'] ?? [];
+        $orderInfo = $orderData['order_info'] ?? [];
+
+        $orderId = $id; // For the view to use
         require_once 'app/views/orders/detail.php';
     }
 
