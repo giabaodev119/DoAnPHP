@@ -104,7 +104,7 @@
                 });
             </script>
         <?php else: ?>
-            <p style="text-align: center;">Chào mừng đến với cửa hàng công nghệ!</p>
+            <p style="text-align: center;">Chào mừng đến với cửa hàng của chúng tôi!</p>
         <?php endif; ?>
     </section>
 
