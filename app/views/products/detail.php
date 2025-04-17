@@ -6,6 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= htmlspecialchars($product['name']) ?> - Chi tiết sản phẩm</title>
+    <link rel="stylesheet" href="public/css/style.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         .product-thumbnail {
@@ -115,7 +116,27 @@
 
                 <div class="mb-3">
                     <h4>Thông tin sản phẩm</h4>
-                    <p><?= nl2br(htmlspecialchars($product['description'])) ?></p>
+                    <?php
+                    // Get the product description
+                    $description = $product['description'];
+                    $shortDesc = mb_substr($description, 0, 150); // Get first 150 characters
+                    $isLongDesc = mb_strlen($description) > 150;
+                    ?>
+
+                    <p id="shortDescription">
+                        <?= nl2br(htmlspecialchars($shortDesc)) ?>
+                        <?php if ($isLongDesc): ?>
+                            <span>...</span>
+                            <a href="javascript:void(0)" id="readMoreBtn" class="text-primary" onclick="toggleDescription()">Xem thêm</a>
+                        <?php endif; ?>
+                    </p>
+
+                    <?php if ($isLongDesc): ?>
+                        <p id="fullDescription" style="display: none;">
+                            <?= nl2br(htmlspecialchars($description)) ?>
+                            <a href="javascript:void(0)" class="text-primary" onclick="toggleDescription()">Thu gọn</a>
+                        </p>
+                    <?php endif; ?>
                 </div>
 
                 <!-- Hiển thị thông tin về size và số lượng -->
@@ -212,7 +233,7 @@
         </div>
     </div>
 
-    <?php include 'app/views/partials/footer.php'; ?>
+    <?php require_once 'app/views/partials/footer.php'; ?>
 
     <script>
         function changeMainImage(imageSrc, thumbnail) {
@@ -225,6 +246,19 @@
                 item.classList.remove('active');
             });
             thumbnail.classList.add('active');
+        }
+
+        function toggleDescription() {
+            const shortDesc = document.getElementById('shortDescription');
+            const fullDesc = document.getElementById('fullDescription');
+
+            if (shortDesc.style.display === 'none') {
+                shortDesc.style.display = 'block';
+                fullDesc.style.display = 'none';
+            } else {
+                shortDesc.style.display = 'none';
+                fullDesc.style.display = 'block';
+            }
         }
     </script>
 </body>
